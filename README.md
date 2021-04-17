@@ -1,14 +1,3 @@
-# Welcome to your CDK TypeScript project!
+# millhouse.dev
 
-This is a blank project for TypeScript development with CDK.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-## Useful commands
-
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+This repository contains CDK stack and source code to deploy my personal website. I use this website to write blog posts about topics that interest me and experiment with different web technologies. You can visit the website [here](https://millhouse.dev).

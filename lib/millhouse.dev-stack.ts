@@ -11,10 +11,12 @@ export class MillhouseDevStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // Fetch hosted zone via the domain name.
     const hostedZone = route53.HostedZone.fromLookup(this, "hosted-zone", {
-      domainName: "tothepoint.dev",
+      domainName: "millhouse.dev",
     });
 
+    // Create an S3 bucket to store the compiled website code.
     const bucket = new s3.Bucket(this, "bucket", {
       publicReadAccess: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -22,21 +24,15 @@ export class MillhouseDevStack extends cdk.Stack {
       websiteIndexDocument: "index.html",
     });
 
+    // Create a DNS validated certificate for HTTPS. The region has to be 'us-east-1'.
     const dnsValidatedCertificate = new certificatemanager.DnsValidatedCertificate(this, "dns-validated-certificate", {
-      domainName: "example.tothepoint.dev",
+      domainName: "millhouse.dev",
       hostedZone: hostedZone,
       region: "us-east-1",
     });
 
+    // Create a web distribution attached to the S3 bucket and DNS validated certificate.
     const webDistribution = new cloudfront.CloudFrontWebDistribution(this, "web-distribution", {
-      // aliasConfiguration: {
-      //   acmCertRef: dnsValidatedCertificate.certificateArn,
-      //   names: [
-      //     "example.tothepoint.dev",
-      //   ],
-      //   sslMethod: cloudfront.SSLMethod.SNI,
-      //   securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2019,
-      // },
       originConfigs: [
         {
           customOriginSource: {
@@ -50,22 +46,38 @@ export class MillhouseDevStack extends cdk.Stack {
           ],
         },
       ],
+      // Route 403 and 404 requests back to /index.html. This allows the Vue Router to work.
+      errorConfigurations: [
+        {
+          errorCachingMinTtl: 0,
+          errorCode: 403,
+          responseCode: 200,
+          responsePagePath: "/index.html"
+        },
+        {
+          errorCachingMinTtl: 0,
+          errorCode: 404,
+          responseCode: 200,
+          responsePagePath: "/index.html"
+        }
+      ],
       viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(dnsValidatedCertificate, {
-        // sslMethod: cloudfront.SSLMethod.SNI,
-        // securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2019
         aliases: [
-          "example.tothepoint.dev"
+          "millhouse.dev"
         ]
       }),
     });
 
+    // Create an A record pointing at the web distribution.
     new route53.ARecord(this, "a-record", {
-      recordName: "example.tothepoint.dev",
       zone: hostedZone,
+      recordName: "millhouse.dev",
       ttl: cdk.Duration.seconds(60),
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(webDistribution)),
     });
 
+    // Create a bucket deployment. This will use Docker to compile the website
+    // and deploy it to an S3 bucket.
     new s3deploy.BucketDeployment(this, 'bucket-deployment', {
       sources: [
         s3deploy.Source.asset(path.join(__dirname, "../frontend"), {
