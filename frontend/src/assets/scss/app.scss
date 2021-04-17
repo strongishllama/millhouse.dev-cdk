@@ -63,18 +63,18 @@ a {
 }
 
 html {
-  background-color: $background-color-light;
-  color: $text-color-light;
+  font-family: Roboto, Avenir, Helvetica, Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 
-  &.dark {
-    background-color: $background-color-dark;
-    color: $text-color-dark;
+  @media (prefers-color-scheme: light) {
+    background-color: $background-color-light;
+    color: $text-color-light;
   }
 
-  &* {
-    font-family: Roboto, Avenir, Helvetica, Arial;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  @media (prefers-color-scheme: dark) {
+    background-color: $background-color-dark;
+    color: $text-color-dark;
   }
 }
 

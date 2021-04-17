@@ -1,0 +1,42 @@
+{
+    "background_color": "#000000",
+    "categories": [
+        "Blog",
+        "Blog Posts",
+        "Go",
+        "Golang",
+        "Portfolio",
+        "Posts",
+        "Software",
+        "Software Development",
+        "Taliesin Millhouse"
+    ],
+    "description": "This is my personal website where I post about topics that interest me.",
+    "dir": "ltr",
+    "display": "standalone",
+    "icons": [
+        {
+            "purpose": "maskable",
+            "sizes": "192x192",
+            "src": "/img/icons/android-chrome-192x192.png",
+            "type": "image/png"
+        },
+        {
+            "purpose": "maskable",
+            "sizes": "384x384",
+            "src": "/img/icons/android-chrome-384x384.png",
+            "type": "image/png"
+        }
+    ],
+    "lang": "en-AU",
+    "name": "Millhouse Dev",
+    "short_name": "Millhouse",
+    "shortcuts": [
+        {
+            "name": "Posts",
+            "url": "/posts",
+            "description": "A list of all the posts."
+        }
+    ],
+    "theme_color": "#000000"
+}
