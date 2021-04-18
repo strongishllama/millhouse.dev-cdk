@@ -29,3 +29,6 @@ node_modules/
 *.js
 !jest.config.js
 *.d.ts
+
+# Include .js files in the frontend directory.
+!frontend/**/*.js
