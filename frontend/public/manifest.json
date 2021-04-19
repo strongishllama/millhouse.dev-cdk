@@ -16,15 +16,15 @@
     "display": "standalone",
     "icons": [
         {
-            "purpose": "maskable",
+            "purpose": "maskable any",
+            "src": "assets/images/manifest-icon-192.png",
             "sizes": "192x192",
-            "src": "/img/icons/android-chrome-192x192.png",
             "type": "image/png"
         },
         {
-            "purpose": "maskable",
-            "sizes": "384x384",
-            "src": "/img/icons/android-chrome-384x384.png",
+            "purpose": "maskable any",
+            "src": "assets/images/manifest-icon-512.png",
+            "sizes": "512x512",
             "type": "image/png"
         }
     ],
@@ -33,9 +33,16 @@
     "short_name": "Millhouse",
     "shortcuts": [
         {
+            "description": "A list of all the posts.",
+            "icons": [
+                {
+                    "sizes": "192x192",
+                    "src": "assets/images/shortcuts/posts.png",
+                    "type": "image/png"
+                }
+            ],
             "name": "Posts",
-            "url": "/posts",
-            "description": "A list of all the posts."
+            "url": "/posts"
         }
     ],
     "theme_color": "#000000"

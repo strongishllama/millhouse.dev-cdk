@@ -35,9 +35,8 @@ export class MillhouseDevStack extends cdk.Stack {
     const webDistribution = new cloudfront.CloudFrontWebDistribution(this, "web-distribution", {
       originConfigs: [
         {
-          customOriginSource: {
-            domainName: bucket.bucketWebsiteDomainName,
-            originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          s3OriginSource: {
+            s3BucketSource: bucket
           },
           behaviors: [
             {
