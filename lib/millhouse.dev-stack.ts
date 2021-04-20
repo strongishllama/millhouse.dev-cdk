@@ -1,10 +1,11 @@
 import * as cdk from "@aws-cdk/core";
 import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as origins from "@aws-cdk/aws-cloudfront-origins";
 import * as route53 from "@aws-cdk/aws-route53";
+import * as targets from "@aws-cdk/aws-route53-targets";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as s3deploy from "@aws-cdk/aws-s3-deployment";
-import * as targets from "@aws-cdk/aws-route53-targets";
 import * as path from "path";
 
 export class MillhouseDevStack extends cdk.Stack {
@@ -31,40 +32,28 @@ export class MillhouseDevStack extends cdk.Stack {
       region: "us-east-1",
     });
 
-    // Create a web distribution attached to the S3 bucket and DNS validated certificate.
-    const webDistribution = new cloudfront.CloudFrontWebDistribution(this, "web-distribution", {
-      originConfigs: [
-        {
-          s3OriginSource: {
-            s3BucketSource: bucket
-          },
-          behaviors: [
-            {
-              isDefaultBehavior: true,
-            },
-          ],
-        },
+    // Create a distribution attached to the S3 bucket and DNS validated certificate.
+    const distribution = new cloudfront.Distribution(this, "distribution", {
+      defaultBehavior: {
+        origin: new origins.S3Origin(bucket)
+      },
+      certificate: dnsValidatedCertificate,
+      defaultRootObject: "index.html",
+      domainNames: [
+        "millhouse.dev"
       ],
-      // Route 403 and 404 requests back to /index.html. This allows the Vue Router to work.
-      errorConfigurations: [
+      errorResponses: [
         {
-          errorCachingMinTtl: 0,
-          errorCode: 403,
-          responseCode: 200,
+          httpStatus: 403,
+          responseHttpStatus: 200,
           responsePagePath: "/index.html"
         },
         {
-          errorCachingMinTtl: 0,
-          errorCode: 404,
-          responseCode: 200,
+          httpStatus: 404,
+          responseHttpStatus: 200,
           responsePagePath: "/index.html"
         }
-      ],
-      viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(dnsValidatedCertificate, {
-        aliases: [
-          "millhouse.dev"
-        ]
-      }),
+      ]
     });
 
     // Create an A record pointing at the web distribution.
@@ -72,7 +61,7 @@ export class MillhouseDevStack extends cdk.Stack {
       zone: hostedZone,
       recordName: "millhouse.dev",
       ttl: cdk.Duration.seconds(60),
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(webDistribution)),
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
     });
 
     // Create a bucket deployment. This will use Docker to compile the website
@@ -94,7 +83,7 @@ export class MillhouseDevStack extends cdk.Stack {
         }),
       ],
       destinationBucket: bucket,
-      distribution: webDistribution,
+      distribution: distribution,
       distributionPaths: [
         "/*",
       ],
