@@ -2,52 +2,54 @@
 <html lang="en">
   <head>
     <!-- General head options. -->
-    <link rel="icon" href="<%= BASE_URL %>assets/images/favicon.png">
     <meta charset="utf-8">
+    <link rel="icon" href="<%= BASE_URL %>static/images/favicon.png">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta name="description" content="This is my personal website where I post about topics that interest me.">
+    <meta name="mobile-web-app-capable" content="yes">
     <title><%= htmlWebpackPlugin.options.title %></title>
     <!-- Open Graph meta tags for social link previews. -->
     <meta content="Taliesin Millhouse · Software Developer" property="og:title">
     <meta content="This is my personal website where I post about topics that interest me." property="og:description">
-    <meta content="<%= BASE_URL %>assets/images/og-image.png" property="og:image">
+    <meta content="<%= BASE_URL %>static/images/og-image.png" property="og:image">
     <!-- Twitter meta tags for social link previews. -->
     <meta name="twitter:card" content="summary_large_image"></meta>
     <meta name="twitter:title" content="Taliesin Millhouse · Software Developer">
     <meta name="twitter:description" content="This is my personal website where I post about topics that interest me.">
-    <meta name="twitter:image" content="<%= BASE_URL %>assets/images/og-image.png">
+    <meta name="twitter:image" content="<%= BASE_URL %>static/images/og-image.png">
     <!-- IOS PWA icons and splash screen images. -->
-    <link rel="apple-touch-icon" href="<%= BASE_URL %>assets/images/apple-icon-180.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2388-1668.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1536-2048.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2048-1536.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1668-2224.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2224-1668.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1620-2160.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2160-1620.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1284-2778.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2778-1284.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1170-2532.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2532-1170.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1125-2436.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2436-1125.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1242-2688.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2688-1242.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-828-1792.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1792-828.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1242-2208.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-2208-1242.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-750-1334.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1334-750.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>assets/images/splashscreens/apple-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
-    <!-- Cloudflare analytics. -->
-    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "302db4adb3dc4313b2ac7bd4ed4b5007"}'></script>
+    <link rel="apple-touch-icon" href="<%= BASE_URL %>static/images/apple-icon-180.png">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2388-1668.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1536-2048.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2048-1536.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1668-2224.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2224-1668.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1620-2160.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2160-1620.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1284-2778.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2778-1284.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1170-2532.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2532-1170.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1125-2436.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2436-1125.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1242-2688.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2688-1242.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-828-1792.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1792-828.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1242-2208.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-2208-1242.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-750-1334.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1334-750.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="<%= BASE_URL %>static/images/splashscreens/apple-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <!-- Cloudflare analytics, only run in production. -->
+    <% if (process.env.NODE_ENV === 'production') { %>
+      <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "302db4adb3dc4313b2ac7bd4ed4b5007"}'></script>
+    <% } %>
   </head>
   <body>
     <noscript>
