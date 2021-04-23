@@ -14,7 +14,7 @@ export class MillhouseDevStack extends cdk.Stack {
 
     // Fetch hosted zone via the domain name.
     const hostedZone = route53.HostedZone.fromLookup(this, "hosted-zone", {
-      domainName: "millhouse.dev",
+      domainName: "millhouse.dev"
     });
 
     // Create an S3 bucket to store the compiled website code.
@@ -22,7 +22,7 @@ export class MillhouseDevStack extends cdk.Stack {
       publicReadAccess: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
-      websiteIndexDocument: "index.html",
+      websiteIndexDocument: "index.html"
     });
 
     // Create a DNS validated certificate for HTTPS. The region has to be 'us-east-1'.
@@ -35,7 +35,7 @@ export class MillhouseDevStack extends cdk.Stack {
     // Create a distribution attached to the S3 bucket and DNS validated certificate.
     const distribution = new cloudfront.Distribution(this, "distribution", {
       defaultBehavior: {
-        origin: new origins.S3Origin(bucket)
+        origin: new origins.S3Origin(bucket),
       },
       certificate: dnsValidatedCertificate,
       defaultRootObject: "index.html",
@@ -61,7 +61,7 @@ export class MillhouseDevStack extends cdk.Stack {
       zone: hostedZone,
       recordName: "millhouse.dev",
       ttl: cdk.Duration.seconds(60),
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution))
     });
 
     // Create a bucket deployment. This will use Docker to compile the website
@@ -85,8 +85,8 @@ export class MillhouseDevStack extends cdk.Stack {
       destinationBucket: bucket,
       distribution: distribution,
       distributionPaths: [
-        "/*",
-      ],
+        "/*"
+      ]
     });
   }
 }
