@@ -5,10 +5,10 @@
       <h1 class="title">Taliesin Millhouse</h1>
       <h2 class="sub-title">Software Developer</h2>
       <a class="icon" href="https://github.com/strongishllama" target="_blank" rel="noopener" aria-label="GitHub">
-        <i class="fab fa-github fa-2x"></i>
+        <font-awesome-icon :icon="['fab', 'github']" size="2x" />
       </a>
       <a class="icon" href="https://www.linkedin.com/in/taliesin-millhouse-00001" target="_blank" rel="noopener" aria-label="LinkedIn">
-        <i class="fab fa-linkedin-in fa-2x"></i>
+        <font-awesome-icon :icon="['fab', 'linkedin-in']" size="2x" />
       </a>
     </div>
   </div>

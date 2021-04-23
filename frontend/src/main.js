@@ -6,4 +6,11 @@ import store from "./store";
 
 import "./assets/scss/app.scss";
 
-createApp(App).use(store).use(router).mount("#app");
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faCalendarAlt } from "@fortawesome/free-regular-svg-icons";
+import { faGithub, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+
+library.add(faCalendarAlt, faGithub, faLinkedinIn);
+
+createApp(App).use(store).use(router).component("font-awesome-icon", FontAwesomeIcon).mount("#app");
