@@ -8,8 +8,9 @@ import * as s3 from "@aws-cdk/aws-s3";
 import { Stage } from "./stage";
 
 export interface WebsiteStackProps extends cdk.StackProps {
+  prefix: string;
   stage: Stage;
-  originBucket: s3.Bucket;
+  originBucketArn: string;
 }
 
 export class WebsiteStack extends cdk.Stack {
@@ -17,7 +18,7 @@ export class WebsiteStack extends cdk.Stack {
     super(scope, id, props);
 
     // Fetch hosted zone via the domain name.
-    const hostedZone = route53.HostedZone.fromLookup(this, `hosted-zone-${props.stage}`, {
+    const hostedZone = route53.HostedZone.fromLookup(this, `${props.prefix}-hosted-zone-${props.stage}`, {
       domainName: "millhouse.dev"
     });
 
@@ -25,16 +26,17 @@ export class WebsiteStack extends cdk.Stack {
     const fullDomainName = props.stage === Stage.PROD ? "millhouse.dev" : `${props.stage}.millhouse.dev`;
 
     // Create a DNS validated certificate for HTTPS. The region has to be 'us-east-1'.
-    const dnsValidatedCertificate = new certificatemanager.DnsValidatedCertificate(this, `dns-validated-certificate-${props.stage}`, {
+    const dnsValidatedCertificate = new certificatemanager.DnsValidatedCertificate(this, `${props.prefix}-dns-validated-certificate-${props.stage}`, {
       domainName: fullDomainName,
       hostedZone: hostedZone,
       region: "us-east-1",
     });
 
     // Create a distribution attached to the S3 bucket and DNS validated certificate.
-    const distribution = new cloudfront.Distribution(this, `distribution-${props.stage}`, {
+    const distribution = new cloudfront.Distribution(this, `${props.prefix}-distribution-${props.stage}`, {
       defaultBehavior: {
-        origin: new origins.S3Origin(props.originBucket),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        origin: new origins.S3Origin(s3.Bucket.fromBucketArn(this, `${props.prefix}-origin-bucket-${props.stage}`, props.originBucketArn)),
       },
       certificate: dnsValidatedCertificate,
       defaultRootObject: "index.html",
@@ -56,7 +58,7 @@ export class WebsiteStack extends cdk.Stack {
     });
 
     // Create an A record pointing at the web distribution.
-    new route53.ARecord(this, `a-record-${props.stage}`, {
+    new route53.ARecord(this, `${props.prefix}-a-record-${props.stage}`, {
       zone: hostedZone,
       recordName: fullDomainName,
       ttl: cdk.Duration.seconds(60),

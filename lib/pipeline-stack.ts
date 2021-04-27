@@ -7,9 +7,10 @@ import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import { Stage } from "./stage";
 
 export interface PipelineStackProps extends cdk.StackProps {
+  prefix: string;
   stage: Stage;
   oauthTokenSecretArn: string;
-  deployBucket: s3.Bucket;
+  deployBucketArn: string;
   approvalNotifyEmails: string[];
 }
 
@@ -22,7 +23,11 @@ export class PipelineStack extends cdk.Stack {
     const buildOutput = new codepipeline.Artifact();
 
     // Create pipeline to source, build and deploy the frontend website.
-    const pipeline = new codepipeline.Pipeline(this, `pipeline-${props.stage}`, {
+    const pipeline = new codepipeline.Pipeline(this, `${props.prefix}-pipeline-${props.stage}`, {
+      artifactBucket: new s3.Bucket(this, `${props.prefix}-bucket-${props.stage}`, {
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true
+      }),
       stages: [
         {
           stageName: "Source",
@@ -32,8 +37,9 @@ export class PipelineStack extends cdk.Stack {
               output: sourceOutput,
               owner: "strongishllama",
               repo: "millhouse.dev-frontend",
-              branch: props.stage === Stage.PROD ? "main" : "develop",
-              oauthToken: secretsmanager.Secret.fromSecretCompleteArn(this, `secret-${props.stage}`, props.oauthTokenSecretArn).secretValue
+              branch: props.stage === Stage.PROD ? "release" : "main",
+              oauthToken: secretsmanager.Secret.fromSecretCompleteArn(this, `${props.prefix}-secret-${props.stage}`, props.oauthTokenSecretArn).secretValue,
+              trigger: codepipeline_actions.GitHubTrigger.POLL
             })
           ]
         },
@@ -46,7 +52,7 @@ export class PipelineStack extends cdk.Stack {
               outputs: [
                 buildOutput
               ],
-              project: new codebuild.PipelineProject(this, `project-${props.stage}`, {
+              project: new codebuild.PipelineProject(this, `${props.prefix}-project-${props.stage}`, {
                 environment: {
                   buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
                 }
@@ -76,7 +82,7 @@ export class PipelineStack extends cdk.Stack {
         new codepipeline_actions.S3DeployAction({
           actionName: "Deploy",
           input: buildOutput,
-          bucket: props.deployBucket
+          bucket: s3.Bucket.fromBucketArn(this, `${props.prefix}-deploy-bucket-${props.stage}`, props.deployBucketArn)
         })
       ]
     });

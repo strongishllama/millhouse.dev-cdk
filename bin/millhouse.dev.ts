@@ -5,55 +5,57 @@ import { PipelineStack } from "../lib/pipeline-stack";
 import { Stage } from "../lib/stage";
 import { WebsiteStack } from "../lib/website-stack";
 
-const app = new cdk.App();
-cdk.Tags.of(app).add("project", "millhouse.dev");
-
-// Development stacks.
 const environmentDev = {
   account: checkEnv("AWS_ACCOUNT_DEV"),
   region: checkEnv("AWS_REGION_DEV")
 };
-
-const bootstrapStackDev = new BootstrapStack(app, `bootstrap-stack-${Stage.DEV}`, {
-  env: environmentDev,
-  stage: Stage.DEV
-});
-
-new PipelineStack(app, `pipeline-stack-${Stage.DEV}`, {
-  env: environmentDev,
-  stage: Stage.DEV,
-  oauthTokenSecretArn: checkEnv("OAUTH_TOKEN_SECRET_ARN"),
-  deployBucket: bootstrapStackDev.bucket,
-  approvalNotifyEmails: checkEnv("APPROVAL_NOTIFY_EMAILS").split(",")
-});
-
-new WebsiteStack(app, `website-stack-${Stage.DEV}`, {
-  env: environmentDev,
-  stage: Stage.DEV,
-  originBucket: bootstrapStackDev.bucket
-});
-
-// Production stacks.
 const environmentProd = {
   account: checkEnv("AWS_ACCOUNT_PROD"),
   region: checkEnv("AWS_REGION_PROD")
 };
+const prefix = "millhouse-dev";
 
-const bootstrapStackProd = new BootstrapStack(app, `bootstrap-stack-${Stage.PROD}`, {
+const app = new cdk.App();
+cdk.Tags.of(app).add("project", "millhouse.dev");
+
+// Development stacks.
+new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.DEV}`, {
+  prefix: prefix,
+  env: environmentDev,
+  stage: Stage.DEV
+});
+new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.DEV}`, {
+  prefix: prefix,
+  env: environmentDev,
+  stage: Stage.DEV,
+  oauthTokenSecretArn: checkEnv("OAUTH_TOKEN_SECRET_ARN"),
+  deployBucketArn: checkEnv("BUCKET_ARN_DEV"),
+  approvalNotifyEmails: checkEnv("APPROVAL_NOTIFY_EMAILS").split(",")
+});
+new WebsiteStack(app, `${prefix}-website-stack-${Stage.DEV}`, {
+  prefix: prefix,
+  env: environmentDev,
+  stage: Stage.DEV,
+  originBucketArn: checkEnv("BUCKET_ARN_DEV")
+});
+
+// Production stacks.
+new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.PROD}`, {
+  prefix: prefix,
   env: environmentProd,
   stage: Stage.PROD
 });
-
-new PipelineStack(app, `pipeline-stack-${Stage.PROD}`, {
+new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.PROD}`, {
+  prefix: prefix,
   env: environmentProd,
   stage: Stage.PROD,
   oauthTokenSecretArn: checkEnv("OAUTH_TOKEN_SECRET_ARN"),
-  deployBucket: bootstrapStackProd.bucket,
+  deployBucketArn: checkEnv("BUCKET_ARN_PROD"),
   approvalNotifyEmails: checkEnv("APPROVAL_NOTIFY_EMAILS").split(",")
 });
-
-new WebsiteStack(app, `website-stack-${Stage.PROD}`, {
+new WebsiteStack(app, `${prefix}-website-stack-${Stage.PROD}`, {
+  prefix: prefix,
   env: environmentProd,
   stage: Stage.PROD,
-  originBucket: bootstrapStackProd.bucket
+  originBucketArn: checkEnv("BUCKET_ARN_PROD")
 });

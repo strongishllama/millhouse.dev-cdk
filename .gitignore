@@ -30,5 +30,3 @@ node_modules/
 !jest.config.js
 *.d.ts
 
-# Include .js files in the frontend directory.
-!frontend/**/*.js
