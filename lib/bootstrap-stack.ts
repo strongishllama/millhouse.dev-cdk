@@ -1,6 +1,8 @@
-import * as cdk from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
-import { Stage } from "./stage";
+import * as cdk from '@aws-cdk/core';
+import * as s3 from '@aws-cdk/aws-s3';
+import * as ssm from '@aws-cdk/aws-ssm';
+
+import { Stage } from './stage';
 
 export interface BootstrapStackProps extends cdk.StackProps {
   prefix: string;
@@ -16,12 +18,14 @@ export class BootstrapStack extends cdk.Stack {
       publicReadAccess: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
-      websiteIndexDocument: "index.html"
+      websiteIndexDocument: 'index.html'
     });
 
-    // Output the bucket ARN so other stacks can reference it via an environment variable.
-    new cdk.CfnOutput(this, `${props.prefix}-bucket-arn${props.stage}`, {
-      value: bucket.bucketArn
+    // Create a string parameter for the bucket ARN so other stacks can reference it.
+    new ssm.StringParameter(this, `${props.prefix}-bucket-arn-${props.stage}`, {
+      parameterName: `${props.prefix}-bucket-arn-${props.stage}`,
+      tier: ssm.ParameterTier.STANDARD,
+      stringValue: bucket.bucketArn
     });
   }
 }
