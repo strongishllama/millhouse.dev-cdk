@@ -1,4 +1,5 @@
 import * as cdk from '@aws-cdk/core';
+import { ApiStack } from '../lib/api-stack';
 import { BootstrapStack } from '../lib/bootstrap-stack';
 import { checkEnv } from '../lib/env';
 import { PipelineStack } from '../lib/pipeline-stack';
@@ -19,39 +20,49 @@ const app = new cdk.App();
 
 // Development stacks.
 new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.DEV}`, {
-  prefix: prefix,
   env: environmentDev,
+  prefix: prefix,
+  stage: Stage.DEV
+});
+new ApiStack(app, `${prefix}-api-stack-${Stage.DEV}`, {
+  env: environmentDev,
+  prefix: prefix,
   stage: Stage.DEV
 });
 new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.DEV}`, {
-  prefix: prefix,
   env: environmentDev,
+  prefix: prefix,
   stage: Stage.DEV,
   oauthTokenSecretArn: checkEnv('OAUTH_TOKEN_SECRET_ARN'),
   approvalNotifyEmails: checkEnv('APPROVAL_NOTIFY_EMAILS').split(',')
 });
 new WebsiteStack(app, `${prefix}-website-stack-${Stage.DEV}`, {
-  prefix: prefix,
   env: environmentDev,
+  prefix: prefix,
   stage: Stage.DEV,
 });
 
 // Production stacks.
 new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.PROD}`, {
-  prefix: prefix,
   env: environmentProd,
+  prefix: prefix,
+  stage: Stage.PROD
+});
+new ApiStack(app, `${prefix}-api-stack-${Stage.PROD}`, {
+  env: environmentProd,
+  prefix: prefix,
   stage: Stage.PROD
 });
 new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.PROD}`, {
-  prefix: prefix,
   env: environmentProd,
+  prefix: prefix,
   stage: Stage.PROD,
   oauthTokenSecretArn: checkEnv('OAUTH_TOKEN_SECRET_ARN'),
   approvalNotifyEmails: checkEnv('APPROVAL_NOTIFY_EMAILS').split(',')
 });
 new WebsiteStack(app, `${prefix}-website-stack-${Stage.PROD}`, {
-  prefix: prefix,
   env: environmentProd,
+  prefix: prefix,
   stage: Stage.PROD,
 });
 
