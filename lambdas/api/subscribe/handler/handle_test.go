@@ -18,7 +18,7 @@ func TestHandle(t *testing.T) {
 
 	response, err := handler.Handle(context.Background(), &events.APIGatewayProxyRequest{
 		HTTPMethod: http.MethodPut,
-		Body: "{\"emailAddress\":\"test@example.com\"}",
+		Body: `{"emailAddress":"test@example.com"}`,
 	})
 
 	require.NoError(t, err)

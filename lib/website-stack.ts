@@ -18,7 +18,7 @@ export class WebsiteStack extends cdk.Stack {
     super(scope, id, props);
 
     // Fetch hosted zone via the domain name.
-    const hostedZone = route53.HostedZone.fromLookup(this, `${props.prefix}-hosted-zone-${props.stage}`, {
+    const hostedZone = route53.HostedZone.fromLookup(this, `${props.prefix}-website-hosted-zone-${props.stage}`, {
       domainName: 'millhouse.dev'
     });
 
