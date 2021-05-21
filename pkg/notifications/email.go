@@ -1,65 +1,21 @@
-package api
+package notifications
 
 import (
 	"bytes"
 	"context"
-	"embed"
 	"encoding/json"
-	"net/http"
 	"text/template"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	email "github.com/gofor-little/aws-email"
 	"github.com/gofor-little/xerror"
 )
 
-var (
-	HTTPClient httpClient
-	SQSClient  sqsiface.SQSAPI
-
-	//go:embed templates
-	templates embed.FS
-)
-
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
-func Initialize(profile string, region string) error {
-	HTTPClient = &http.Client{
-		Timeout: time.Duration(3 * time.Second),
-	}
-
-	var sess *session.Session
-	var err error
-
-	if profile != "" && region != "" {
-		sess, err = session.NewSessionWithOptions(session.Options{
-			Config: aws.Config{
-				Region: aws.String(region),
-			},
-			Profile: profile,
-		})
-	} else {
-		sess, err = session.NewSession()
-	}
-	if err != nil {
-		return xerror.New("failed to create session.Session", err)
-	}
-
-	SQSClient = sqs.New(sess)
-
-	return nil
-}
-
-func sendEmail(ctx context.Context, queueURL string, to []string, from string, subject string, bodyTemplate string, contentType email.ContentType) (string, error) {
+func SendEmail(ctx context.Context, queueURL string, to []string, from string, subject string, bodyTemplate string, contentType email.ContentType) (string, error) {
 	tmpl := template.New("template")
 
-	data, err := templates.ReadFile(bodyTemplate)
+	data, err := templates.ReadFile("templates/" + bodyTemplate)
 	if err != nil {
 		return "", xerror.New("failed to read file data", err)
 	}

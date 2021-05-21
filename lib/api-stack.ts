@@ -8,7 +8,6 @@ import * as targets from '@aws-cdk/aws-route53-targets';
 import { EmailService } from '@strongishllama/email-service-cdk';
 import { Stage } from './stage';
 import { Method } from './method';
-import { Certificate } from 'crypto';
 
 export interface ApiStackProps extends cdk.StackProps {
   prefix: string;
@@ -20,6 +19,12 @@ export class ApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
+    // Create the email service.
+    const emailService = new EmailService(this, `${props.prefix}-email-service-${props.stage}`, {
+      prefix: props.prefix,
+      suffix: props.stage
+    });
+
     // Create a REST API for the website to interact with.
     const api = new apigateway.RestApi(this, `${props.prefix}-rest-api-${props.stage}`, {
       deployOptions: {
@@ -28,28 +33,41 @@ export class ApiStack extends cdk.Stack {
     });
 
     // Add ping method - /
-    const subscribeFunction = new lambda.GoFunction(this, `${props.prefix}-ping-function-${props.stage}`, {
+    api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(new lambda.GoFunction(this, `${props.prefix}-ping-function-${props.stage}`, {
       entry: 'lambdas/api/ping'
-    });
-    api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(subscribeFunction));
+    })));
 
     // Add subscribe method - /subscribe
-    api.root.addResource('subscribe').addMethod(Method.PUT, new apigateway.LambdaIntegration(new lambda.GoFunction(this, `${props.prefix}-subscribe-function-${props.stage}`, {
+    const subscribeFunction = new lambda.GoFunction(this, `${props.prefix}-subscribe-function-${props.stage}`, {
       entry: 'lambdas/api/subscribe',
+      bundling: {
+        goBuildFlags: [
+          '-ldflags="-s -w"'
+        ]
+      },
       environment: {
-        "CONFIG_SECRET_ARN": props.subscribeConfigArn
+        'CONFIG_SECRET_ARN': props.subscribeConfigArn
       },
       initialPolicy: [
         new iam.PolicyStatement({
           actions: [
-            "secretsmanager:GetSecretValue"
+            'secretsmanager:GetSecretValue'
           ],
           resources: [
             props.subscribeConfigArn
           ]
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            'sqs:SendMessage'
+          ],
+          resources: [
+            emailService.queueArn
+          ]
         })
       ]
-    })));
+    });
+    api.root.addResource('subscribe').addMethod(Method.PUT, new apigateway.LambdaIntegration(subscribeFunction));
 
     // Fetch hosted zone via the domain name.
     const hostedZone = route53.HostedZone.fromLookup(this, `${props.prefix}-hosted-zone-${props.stage}`, {
@@ -80,15 +98,6 @@ export class ApiStack extends cdk.Stack {
       recordName: fullDomainName,
       ttl: cdk.Duration.seconds(60),
       target: route53.RecordTarget.fromAlias(new targets.ApiGatewayDomain(domain))
-    });
-
-    // Create the email service.
-    new EmailService(this, `${props.prefix}-email-service-${props.stage}`, {
-      prefix: props.prefix,
-      suffix: props.stage,
-      sendMessageArns: [
-        subscribeFunction.functionArn
-      ]
     });
   }
 

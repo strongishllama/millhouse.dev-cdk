@@ -1,5 +1,5 @@
 export enum Method {
-  DELETE = 'delete',
+  DELETE = 'DELETE',
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT'

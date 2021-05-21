@@ -11,6 +11,7 @@ import (
 	"github.com/gofor-little/xerror"
 
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/subscribe/handler"
+	"github.com/strongishllama/millhouse.dev-cdk/pkg/notifications"
 )
 
 func main() {
@@ -31,9 +32,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := handler.Initialize(context.Background(), configSecretARN); err != nil {
+	handler.Cfg = &handler.Config{}
+	if err := cfg.Load(context.Background(), configSecretARN, handler.Cfg); err != nil {
 		log.Error(log.Fields{
-			"error": xerror.New("failed to initialize handler package", err),
+			"error": xerror.New("failed to load config", err),
+		})
+		os.Exit(1)
+	}
+
+	if err := notifications.Initialize("", ""); err != nil {
+		log.Error(log.Fields{
+			"error": xerror.New("failed to initialize the notifications package", err),
 		})
 		os.Exit(1)
 	}

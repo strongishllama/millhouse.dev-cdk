@@ -45,5 +45,10 @@ func NewProxyResponse(statusCode int, err error, v interface{}) (*events.APIGate
 		return response, xerror.New("api request failed", err)
 	}
 
+	log.Info(log.Fields{
+		"message":    "api request succeeded",
+		"statusCode": response.StatusCode,
+	})
+
 	return response, nil
 }
