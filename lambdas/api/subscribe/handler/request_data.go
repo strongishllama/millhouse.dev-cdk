@@ -11,12 +11,12 @@ type RequestData struct {
 	ReCaptchaChallengeToken string `json:"recaptchaChallengeToken"`
 }
 
-func (s *RequestData) Validate() error {
-	if _, err := mail.ParseAddress(s.EmailAddress); err != nil {
+func (r *RequestData) Validate() error {
+	if _, err := mail.ParseAddress(r.EmailAddress); err != nil {
 		return xerror.New("failed to validate EmailAddress", err)
 	}
 
-	if s.ReCaptchaChallengeToken == "" {
+	if r.ReCaptchaChallengeToken == "" {
 		return xerror.Newf("ReCaptchaChallengeToken cannot be empty")
 	}
 

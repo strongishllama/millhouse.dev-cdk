@@ -1,11 +1,9 @@
 package handler
 
-var (
-	Cfg *Config
-)
-
 type Config struct {
 	RecaptchaSecret string `json:"recaptchaSecret"`
-	QueueURL        string `json:"queueUrl"`
+	To              string `json:"to"`
 	From            string `json:"from"`
+	WebsiteDomain   string `json:"websiteDomain"`
+	APIDomain       string `json:"apiDomain"`
 }

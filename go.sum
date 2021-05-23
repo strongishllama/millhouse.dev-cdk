@@ -37,6 +37,8 @@ github.com/gofor-little/ts v0.2.6/go.mod h1:oP+s46Ng2FGjr17VOrjn2akcltjHFdtB9QuG
 github.com/gofor-little/xerror v0.2.0/go.mod h1:wjsFMng4jjalKHCSIocghCPYXEHqdpkb37EHTwrlj2I=
 github.com/gofor-little/xerror v0.2.3 h1:IhBbOclv675KbTfbAdL9UTacPiG+i2JEmu1/92fUV4w=
 github.com/gofor-little/xerror v0.2.3/go.mod h1:wjsFMng4jjalKHCSIocghCPYXEHqdpkb37EHTwrlj2I=
+github.com/gofor-little/xrand v0.3.1 h1:SLnRsRRaNw09rgSZROWZzuzCs/8eu9EMHHqTSOCD1Xc=
+github.com/gofor-little/xrand v0.3.1/go.mod h1:qmsRA3PSgi1DIhvNECjzfJr2uN0qosiMjDQcVs5BDOY=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=

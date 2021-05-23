@@ -28,7 +28,7 @@ new ApiStack(app, `${prefix}-api-stack-${Stage.DEV}`, {
   env: environmentDev,
   prefix: prefix,
   stage: Stage.DEV,
-  subscribeConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_DEV')
+  lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_DEV')
 });
 new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.DEV}`, {
   env: environmentDev,
@@ -53,7 +53,7 @@ new ApiStack(app, `${prefix}-api-stack-${Stage.PROD}`, {
   env: environmentProd,
   prefix: prefix,
   stage: Stage.PROD,
-  subscribeConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_PROD')
+  lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_PROD')
 });
 new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.PROD}`, {
   env: environmentProd,

@@ -1,4 +1,4 @@
-package notifications
+package notification
 
 import (
 	"embed"
@@ -8,16 +8,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/gofor-little/xerror"
 )
 
 var (
 	SQSClient sqsiface.SQSAPI
+	QueueURL  string
 
 	//go:embed templates
 	templates embed.FS
 )
 
-func Initialize(profile string, region string) error {
+func Initialize(profile string, region string, queueURL string) error {
 	var sess *session.Session
 	var err error
 
@@ -36,6 +38,19 @@ func Initialize(profile string, region string) error {
 	}
 
 	SQSClient = sqs.New(sess)
+	QueueURL = queueURL
+
+	return nil
+}
+
+func checkPackage() error {
+	if SQSClient == nil {
+		return xerror.Newf("notification.SQSClient is nil, have you called notification.Initialize()?")
+	}
+
+	if QueueURL == "" {
+		return xerror.Newf("notification.QueueURL is empty, did you call notification.Initialize()?")
+	}
 
 	return nil
 }

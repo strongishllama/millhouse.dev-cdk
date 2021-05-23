@@ -8,7 +8,7 @@ import (
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xerror"
 
-	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/subscribe/handler"
+	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
 )
 
 func main() {
