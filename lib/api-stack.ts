@@ -7,6 +7,7 @@ import * as lambda from '@aws-cdk/aws-lambda-go';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as targets from '@aws-cdk/aws-route53-targets';
 import * as ssm from '@aws-cdk/aws-ssm';
+import { DynamoDB, SecretsManager, SQS } from '@strongishllama/iam-constants-cdk';
 import { EmailService } from '@strongishllama/email-service-cdk';
 import { Stage } from './stage';
 import { Method } from './method';
@@ -67,7 +68,7 @@ export class ApiStack extends cdk.Stack {
       initialPolicy: [
         new iam.PolicyStatement({
           actions: [
-            'secretsmanager:GetSecretValue'
+            SecretsManager.GET_SECRET_VALUE
           ],
           resources: [
             props.lambdasConfigArn
@@ -75,7 +76,7 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
-            'sqs:SendMessage'
+            SQS.SEND_MESSAGE
           ],
           resources: [
             emailService.queue.queueArn
@@ -83,8 +84,8 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
-            'dynamodb:PutItem',
-            'dynamodb:Query'
+            DynamoDB.PUT_ITEM,
+            DynamoDB.QUERY,
           ],
           resources: [
             table.tableArn,
@@ -106,7 +107,7 @@ export class ApiStack extends cdk.Stack {
       initialPolicy: [
         new iam.PolicyStatement({
           actions: [
-            'secretsmanager:GetSecretValue'
+            SecretsManager.GET_SECRET_VALUE
           ],
           resources: [
             props.lambdasConfigArn
@@ -114,7 +115,7 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
-            'sqs:SendMessage'
+            SQS.SEND_MESSAGE
           ],
           resources: [
             emailService.queue.queueArn
@@ -122,7 +123,7 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
-            'dynamodb:DeleteItem'
+            DynamoDB.DELETE_ITEM
           ],
           resources: [
             table.tableArn
