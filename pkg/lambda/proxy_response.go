@@ -40,7 +40,7 @@ func NewProxyResponse(statusCode int, contentType ContentType, err error, v inte
 
 			response.Body = string(body)
 		case ContentTypeTextHTML:
-			response.Body = fmt.Sprint(v)
+			response.Body = fmt.Sprintf("%s", v)
 		default:
 			// Unsupported content type, do not write to the response body.
 			log.Error(log.Fields{

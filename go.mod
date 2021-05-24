@@ -12,7 +12,7 @@ require (
 	github.com/gofor-little/cfg v0.2.0
 	github.com/gofor-little/env v0.4.4
 	github.com/gofor-little/log v0.3.6
-	github.com/gofor-little/xerror v0.2.3
+	github.com/gofor-little/xerror v0.3.0
 	github.com/gofor-little/xrand v0.3.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.0

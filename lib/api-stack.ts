@@ -100,6 +100,7 @@ export class ApiStack extends cdk.Stack {
       bundling: bundling,
       environment: {
         'CONFIG_SECRET_ARN': props.lambdasConfigArn,
+        'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
         'TABLE_NAME': table.tableName
       },
       initialPolicy: [
@@ -121,7 +122,7 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
-            'dynamdb:DeleteItem'
+            'dynamodb:DeleteItem'
           ],
           resources: [
             table.tableArn

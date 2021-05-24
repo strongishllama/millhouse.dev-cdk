@@ -72,6 +72,7 @@ func DeleteSubscription(ctx context.Context, id string, emailAddress string) err
 				S: aws.String("SUBSCRIPTION#" + id),
 			},
 		},
+		TableName: aws.String(TableName),
 	}
 
 	if err := input.Validate(); err != nil {
