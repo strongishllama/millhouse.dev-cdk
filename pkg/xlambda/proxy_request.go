@@ -1,4 +1,4 @@
-package lambda
+package xlambda
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 
 func NewProxyRequest(method string, queryParameters map[string]string, body interface{}) (*events.APIGatewayProxyRequest, error) {
 	request := &events.APIGatewayProxyRequest{
-		HTTPMethod: method,
+		HTTPMethod:            method,
 		QueryStringParameters: queryParameters,
 	}
 

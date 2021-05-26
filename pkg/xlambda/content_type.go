@@ -1,4 +1,4 @@
-package lambda
+package xlambda
 
 type ContentType string
 

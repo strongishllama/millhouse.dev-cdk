@@ -22,13 +22,17 @@ const app = new cdk.App();
 new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.DEV}`, {
   env: environmentDev,
   prefix: prefix,
-  stage: Stage.DEV
+  stage: Stage.DEV,
+  adminTo: checkEnv('ADMIN_TO_DEV'),
+  adminFrom: checkEnv('ADMIN_FROM_DEV')
 });
 new ApiStack(app, `${prefix}-api-stack-${Stage.DEV}`, {
   env: environmentDev,
   prefix: prefix,
   stage: Stage.DEV,
-  lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_DEV')
+  lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_DEV'),
+  adminTo: checkEnv('ADMIN_TO_DEV'),
+  adminFrom: checkEnv('ADMIN_FROM_DEV')
 });
 new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.DEV}`, {
   env: environmentDev,
@@ -47,13 +51,17 @@ new WebsiteStack(app, `${prefix}-website-stack-${Stage.DEV}`, {
 new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.PROD}`, {
   env: environmentProd,
   prefix: prefix,
-  stage: Stage.PROD
+  stage: Stage.PROD,
+  adminTo: checkEnv('ADMIN_TO_PROD'),
+  adminFrom: checkEnv('ADMIN_FROM_PROD')
 });
 new ApiStack(app, `${prefix}-api-stack-${Stage.PROD}`, {
   env: environmentProd,
   prefix: prefix,
   stage: Stage.PROD,
-  lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_PROD')
+  lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_PROD'),
+  adminTo: checkEnv('ADMIN_TO_PROD'),
+  adminFrom: checkEnv('ADMIN_FROM_PROD')
 });
 new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.PROD}`, {
   env: environmentProd,

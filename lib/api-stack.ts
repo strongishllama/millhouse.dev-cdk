@@ -3,12 +3,13 @@ import * as apigateway from '@aws-cdk/aws-apigateway';
 import * as certificatemanager from '@aws-cdk/aws-certificatemanager';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as iam from '@aws-cdk/aws-iam';
-import * as lambda from '@aws-cdk/aws-lambda-go';
+import * as go_lambda from '@aws-cdk/aws-lambda-go';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as targets from '@aws-cdk/aws-route53-targets';
 import * as ssm from '@aws-cdk/aws-ssm';
+import * as sqs from '@aws-cdk/aws-sqs';
 import { DynamoDB, SecretsManager, SQS } from '@strongishllama/iam-constants-cdk';
-import { EmailService } from '@strongishllama/email-service-cdk';
+import { bundling } from './lambda';
 import { Stage } from './stage';
 import { Method } from './method';
 
@@ -16,6 +17,8 @@ export interface ApiStackProps extends cdk.StackProps {
   prefix: string;
   stage: Stage;
   lambdasConfigArn: string;
+  adminTo: string;
+  adminFrom: string;
 }
 
 export class ApiStack extends cdk.Stack {
@@ -29,11 +32,12 @@ export class ApiStack extends cdk.Stack {
       ssm.StringParameter.fromStringParameterName(this, `${props.prefix}-subscription-table-arn-${props.stage}`, `${props.prefix}-table-arn-${props.stage}`).stringValue
     );
 
-    // Create the email service.
-    const emailService = new EmailService(this, `${props.prefix}-email-service-${props.stage}`, {
-      prefix: props.prefix,
-      suffix: props.stage
-    });
+    // Fetch the email queue via the queue ARN.
+    const emailQueue = sqs.Queue.fromQueueArn(
+      this,
+      `${props.prefix}-email-queue-${props.stage}`,
+      ssm.StringParameter.fromStringParameterName(this, `${props.prefix}-email-queue-arn-${props.stage}`, `${props.prefix}-email-queue-${props.stage}`).stringValue
+    );
 
     // Create a REST API for the website to interact with.
     const api = new apigateway.RestApi(this, `${props.prefix}-rest-api-${props.stage}`, {
@@ -45,14 +49,8 @@ export class ApiStack extends cdk.Stack {
       },
     });
 
-    const bundling: lambda.BundlingOptions = {
-      goBuildFlags: [
-        '-ldflags="-s -w"'
-      ]
-    };
-
     // Add ping method - /
-    api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(new lambda.GoFunction(this, `${props.prefix}-ping-function-${props.stage}`, {
+    api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, `${props.prefix}-ping-function-${props.stage}`, {
       entry: 'lambdas/api/ping',
       bundling: bundling,
       environment: {
@@ -61,54 +59,14 @@ export class ApiStack extends cdk.Stack {
     })));
 
     // Add subscribe method - /subscribe
-    api.root.addResource('subscribe').addMethod(Method.PUT, new apigateway.LambdaIntegration(new lambda.GoFunction(this, `${props.prefix}-subscribe-function-${props.stage}`, {
+    api.root.addResource('subscribe').addMethod(Method.PUT, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, `${props.prefix}-subscribe-function-${props.stage}`, {
       entry: 'lambdas/api/subscribe',
       bundling: bundling,
       environment: {
+        'ADMIN_TO': props.adminTo,
+        'ADMIN_FROM': props.adminFrom,
         'CONFIG_SECRET_ARN': props.lambdasConfigArn,
-        'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
-        'STAGE': props.stage,
-        'TABLE_NAME': table.tableName,
-        'WEBSITE_DOMAIN': props.stage === Stage.PROD ? 'millhouse.dev' : 'dev.millhouse.dev',
-        'API_DOMAIN': props.stage === Stage.PROD ? 'api.millhouse.dev' : 'dev.api.millhouse.dev'
-      },
-      initialPolicy: [
-        new iam.PolicyStatement({
-          actions: [
-            SecretsManager.GET_SECRET_VALUE
-          ],
-          resources: [
-            props.lambdasConfigArn
-          ]
-        }),
-        new iam.PolicyStatement({
-          actions: [
-            SQS.SEND_MESSAGE
-          ],
-          resources: [
-            emailService.queue.queueArn
-          ]
-        }),
-        new iam.PolicyStatement({
-          actions: [
-            DynamoDB.PUT_ITEM,
-            DynamoDB.QUERY,
-          ],
-          resources: [
-            table.tableArn,
-            `${table.tableArn}/index/*`
-          ]
-        })
-      ]
-    })));
-
-    // Add unsubscribe method - /unsubscribe
-    api.root.addResource('unsubscribe').addMethod(Method.GET, new apigateway.LambdaIntegration(new lambda.GoFunction(this, `${props.prefix}-unsubscribe-function-${props.stage}`, {
-      entry: 'lambdas/api/unsubscribe',
-      bundling: bundling,
-      environment: {
-        'CONFIG_SECRET_ARN': props.lambdasConfigArn,
-        'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
+        'EMAIL_QUEUE_URL': emailQueue.queueUrl,
         'STAGE': props.stage,
         'TABLE_NAME': table.tableName
       },
@@ -123,12 +81,34 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
+            DynamoDB.PUT_ITEM,
+            DynamoDB.QUERY,
+          ],
+          resources: [
+            table.tableArn,
+            `${table.tableArn}/index/*`
+          ]
+        }),
+        new iam.PolicyStatement({
+          actions: [
             SQS.SEND_MESSAGE
           ],
           resources: [
-            emailService.queue.queueArn
+            emailQueue.queueArn
           ]
         }),
+      ]
+    })));
+
+    // Add unsubscribe method - /unsubscribe
+    api.root.addResource('unsubscribe').addMethod(Method.GET, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, `${props.prefix}-unsubscribe-function-${props.stage}`, {
+      entry: 'lambdas/api/unsubscribe',
+      bundling: bundling,
+      environment: {
+        'STAGE': props.stage,
+        'TABLE_NAME': table.tableName
+      },
+      initialPolicy: [
         new iam.PolicyStatement({
           actions: [
             DynamoDB.DELETE_ITEM

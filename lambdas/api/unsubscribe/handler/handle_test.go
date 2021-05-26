@@ -18,7 +18,7 @@ import (
 
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/lambda"
+	"github.com/strongishllama/millhouse.dev-cdk/pkg/xlambda"
 )
 
 var (
@@ -30,7 +30,7 @@ func TestHandle(t *testing.T) {
 	subscription := setup(t)
 	defer teardown(t)
 
-	request, err := lambda.NewProxyRequest(http.MethodGet, map[string]string{
+	request, err := xlambda.NewProxyRequest(http.MethodGet, map[string]string{
 		"id":           subscription.ID,
 		"emailAddress": subscription.EmailAddress,
 	}, nil)
@@ -48,13 +48,6 @@ func setup(t *testing.T) *db.Subscription {
 
 	log.Log = log.NewStandardLogger(os.Stdout, nil)
 	require.NoError(t, db.Initialize(env.Get("TEST_AWS_PROFILE", ""), env.Get("TEST_AWS_REGION", ""), fmt.Sprintf("millhouse-dev-handle-test_%d", time.Now().Unix())))
-
-	to, err := env.MustGet("TEST_TO")
-	require.NoError(t, err)
-	handler.Cfg = &handler.Config{
-		To:   to,
-		From: env.Get("TEST_FROM", "no-reply@millhouse.dev"),
-	}
 
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
@@ -82,7 +75,7 @@ func setup(t *testing.T) *db.Subscription {
 	}
 	require.NoError(t, input.Validate())
 
-	_, err = db.DynamoDBClient.CreateTable(input)
+	_, err := db.DynamoDBClient.CreateTable(input)
 	require.NoError(t, err)
 
 	return createSubscription(t)
