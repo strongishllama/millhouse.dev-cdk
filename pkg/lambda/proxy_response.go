@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xerror"
 )
@@ -15,13 +16,17 @@ import (
 // If err is nil no error will be returned. If the content type is empty/unsupported or v is nil nothing will
 // be written to the response body.
 func NewProxyResponse(statusCode int, contentType ContentType, err error, v interface{}) (*events.APIGatewayProxyResponse, error) {
+	accessControlAllowOrigin := "https://millhouse.dev"
+	if env.Get("STAGE", "prod") != "prod" {
+		accessControlAllowOrigin = "*"
+	}
+
 	response := &events.APIGatewayProxyResponse{
 		Headers: map[string]string{
-			"Content-Type": string(contentType),
-			// "Access-Control-Expose-Headers":    "*",
-			"Access-Control-Allow-Headers": "Date,Content-Type,Content-Length,Connection,x-amzn-RequestId,x-amz-apigw-id,X-Amzn-Trace-Id",
-			"Access-Control-Allow-Origin":  "https://milhouse.dev,https://dev.millhouse.dev",
-			"Access-Control-Allow-Methods": "OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD	",
+			"Content-Type":                 string(contentType),
+			"Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",
+			"Access-Control-Allow-Origin":  accessControlAllowOrigin,
+			"Access-Control-Allow-Methods": "OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD",
 		},
 		StatusCode: statusCode,
 	}
@@ -35,7 +40,7 @@ func NewProxyResponse(statusCode int, contentType ContentType, err error, v inte
 					"error":      xerror.Newf("failed to marshal response body and API request failed", e, err),
 					"statusCode": statusCode,
 				})
-				return response, xerror.Newf("failed to marshal response body and API request failed", e, err)
+				return response, nil
 			}
 
 			response.Body = string(body)
@@ -53,9 +58,9 @@ func NewProxyResponse(statusCode int, contentType ContentType, err error, v inte
 	if err != nil {
 		log.Error(log.Fields{
 			"error":      xerror.New("api request failed", err),
-			"statusCode": statusCode,
+			"statusCode": response.StatusCode,
 		})
-		return response, xerror.New("api request failed", err)
+		return response, nil
 	}
 
 	log.Info(log.Fields{

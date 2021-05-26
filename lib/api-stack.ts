@@ -37,9 +37,12 @@ export class ApiStack extends cdk.Stack {
 
     // Create a REST API for the website to interact with.
     const api = new apigateway.RestApi(this, `${props.prefix}-rest-api-${props.stage}`, {
+      defaultCorsPreflightOptions: {
+        allowOrigins: props.stage === Stage.PROD ? ["https://millhouse.dev"] : apigateway.Cors.ALL_ORIGINS
+      },
       deployOptions: {
         stageName: props.stage
-      }
+      },
     });
 
     const bundling: lambda.BundlingOptions = {
@@ -51,7 +54,10 @@ export class ApiStack extends cdk.Stack {
     // Add ping method - /
     api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(new lambda.GoFunction(this, `${props.prefix}-ping-function-${props.stage}`, {
       entry: 'lambdas/api/ping',
-      bundling: bundling
+      bundling: bundling,
+      environment: {
+        'STAGE': props.stage
+      }
     })));
 
     // Add subscribe method - /subscribe
@@ -61,6 +67,7 @@ export class ApiStack extends cdk.Stack {
       environment: {
         'CONFIG_SECRET_ARN': props.lambdasConfigArn,
         'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
+        'STAGE': props.stage,
         'TABLE_NAME': table.tableName,
         'WEBSITE_DOMAIN': props.stage === Stage.PROD ? 'millhouse.dev' : 'dev.millhouse.dev',
         'API_DOMAIN': props.stage === Stage.PROD ? 'api.millhouse.dev' : 'dev.api.millhouse.dev'
@@ -102,6 +109,7 @@ export class ApiStack extends cdk.Stack {
       environment: {
         'CONFIG_SECRET_ARN': props.lambdasConfigArn,
         'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
+        'STAGE': props.stage,
         'TABLE_NAME': table.tableName
       },
       initialPolicy: [
