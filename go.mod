@@ -3,7 +3,7 @@ module github.com/strongishllama/millhouse.dev-cdk
 go 1.16
 
 require (
-	github.com/aws/aws-lambda-go v1.24.0
+  github.com/aws/aws-lambda-go v1.24.0
 	github.com/aws/aws-sdk-go v1.38.43
 	github.com/gofor-little/aws-email v0.1.1
 	github.com/gofor-little/cfg v0.2.0
