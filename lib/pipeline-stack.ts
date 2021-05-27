@@ -55,7 +55,13 @@ export class PipelineStack extends cdk.Stack {
                 environment: {
                   buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
                 }
-              })
+              }),
+              environmentVariables: {
+                'VUE_APP_API_BASE_URL': {
+                  type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+                  value: props.stage === Stage.PROD ? 'https://api.millhouse.dev' : 'https://dev.api.millhouse.dev'
+                }
+              }
             })
           ]
         }
