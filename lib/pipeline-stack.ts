@@ -8,7 +8,7 @@ import * as ssm from '@aws-cdk/aws-ssm';
 import { Stage } from './stage';
 
 export interface PipelineStackProps extends cdk.StackProps {
-  prefix: string;
+  namespace: string;
   stage: Stage;
   oauthTokenSecretArn: string;
   approvalNotifyEmails: string[];
@@ -23,8 +23,8 @@ export class PipelineStack extends cdk.Stack {
     const buildOutput = new codepipeline.Artifact();
 
     // Create pipeline to source, build and deploy the frontend website.
-    const pipeline = new codepipeline.Pipeline(this, `${props.prefix}-pipeline-${props.stage}`, {
-      artifactBucket: new s3.Bucket(this, `${props.prefix}-bucket-${props.stage}`, {
+    const pipeline = new codepipeline.Pipeline(this, `${props.namespace}-pipeline-${props.stage}`, {
+      artifactBucket: new s3.Bucket(this, `${props.namespace}-bucket-${props.stage}`, {
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true
       }),
@@ -38,7 +38,7 @@ export class PipelineStack extends cdk.Stack {
               owner: 'strongishllama',
               repo: 'millhouse.dev-frontend',
               branch: props.stage === Stage.PROD ? 'release' : 'main',
-              oauthToken: secretsmanager.Secret.fromSecretCompleteArn(this, `${props.prefix}-secret-${props.stage}`, props.oauthTokenSecretArn).secretValue
+              oauthToken: secretsmanager.Secret.fromSecretCompleteArn(this, `${props.namespace}-secret-${props.stage}`, props.oauthTokenSecretArn).secretValue
             })
           ]
         },
@@ -51,7 +51,7 @@ export class PipelineStack extends cdk.Stack {
               outputs: [
                 buildOutput
               ],
-              project: new codebuild.PipelineProject(this, `${props.prefix}-project-${props.stage}`, {
+              project: new codebuild.PipelineProject(this, `${props.namespace}-project-${props.stage}`, {
                 environment: {
                   buildImage: codebuild.LinuxBuildImage.STANDARD_5_0
                 }
@@ -89,8 +89,8 @@ export class PipelineStack extends cdk.Stack {
           input: buildOutput,
           bucket: s3.Bucket.fromBucketArn(
             this,
-            `${props.prefix}-deploy-bucket-${props.stage}`,
-            ssm.StringParameter.fromStringParameterName(this, `${props.prefix}-deploy-bucket-arn-${props.stage}`, `${props.prefix}-bucket-arn-${props.stage}`).stringValue
+            `${props.namespace}-deploy-bucket-${props.stage}`,
+            ssm.StringParameter.fromStringParameterName(this, `${props.namespace}-deploy-bucket-arn-${props.stage}`, `${props.namespace}-bucket-arn-${props.stage}`).stringValue
           )
         })
       ]

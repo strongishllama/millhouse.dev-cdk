@@ -13,7 +13,7 @@ import { bundling } from './lambda';
 import { Stage } from './stage';
 
 export interface BootstrapStackProps extends cdk.StackProps {
-  prefix: string;
+  namespace: string;
   stage: Stage;
   adminTo: string;
   adminFrom: string;
@@ -28,7 +28,7 @@ export class BootstrapStack extends cdk.Stack {
     }
 
     // Create an bucket to store the compiled website code.
-    const bucket = new s3.Bucket(this, `${props.prefix}-bucket-${props.stage}`, {
+    const bucket = new s3.Bucket(this, `${props.namespace}-bucket-${props.stage}`, {
       publicReadAccess: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
@@ -36,27 +36,28 @@ export class BootstrapStack extends cdk.Stack {
     });
 
     // Create a string parameter for the bucket ARN so other stacks can reference it.
-    new ssm.StringParameter(this, `${props.prefix}-bucket-arn-${props.stage}`, {
-      parameterName: `${props.prefix}-bucket-arn-${props.stage}`,
+    new ssm.StringParameter(this, `${props.namespace}-bucket-arn-${props.stage}`, {
+      parameterName: `${props.namespace}-bucket-arn-${props.stage}`,
       tier: ssm.ParameterTier.STANDARD,
       stringValue: bucket.bucketArn
     });
 
     // Create the email service.
-    const emailService = new EmailService(this, `${props.prefix}-email-service-${props.stage}`, {
-      prefix: props.prefix,
-      suffix: props.stage
+    const emailService = new EmailService(this, `${props.namespace}-email-service-${props.stage}`, {
+      prefix: props.namespace,
+      suffix: props.stage,
+      receiveMessageWaitTime: cdk.Duration.seconds(20)
     });
 
     // Create a string parameter for the queue ARN so other stacks can reference it.
-    new ssm.StringParameter(this, `${props.prefix}-queue-arn-${props.stage}`, {
-      parameterName: `${props.prefix}-email-queue-${props.stage}`,
+    new ssm.StringParameter(this, `${props.namespace}-queue-arn-${props.stage}`, {
+      parameterName: `${props.namespace}-email-queue-${props.stage}`,
       tier: ssm.ParameterTier.STANDARD,
       stringValue: emailService.queue.queueArn
     });
 
     // Create a table to store subscription emails.
-    const table = new dynamodb.Table(this, `${props.prefix}-table-${props.stage}`, {
+    const table = new dynamodb.Table(this, `${props.namespace}-table-${props.stage}`, {
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING
@@ -71,7 +72,7 @@ export class BootstrapStack extends cdk.Stack {
     });
 
     // Create a function to receive stream events from the table and add it as an event source.
-    const streamFunction = new go_lambda.GoFunction(this, `${props.prefix}-stream-functions-${props.stage}`, {
+    const streamFunction = new go_lambda.GoFunction(this, `${props.namespace}-stream-functions-${props.stage}`, {
       entry: 'lambdas/stream',
       bundling: bundling,
       environment: {
@@ -94,14 +95,16 @@ export class BootstrapStack extends cdk.Stack {
     });
     streamFunction.addEventSource(new lambda_events.DynamoEventSource(table, {
       bisectBatchOnError: true,
-      onFailure: new lambda_events.SqsDlq(new sqs.Queue(this, `${props.prefix}-stream-dead-letter-queue-${props.stage}`)),
+      onFailure: new lambda_events.SqsDlq(new sqs.Queue(this, `${props.namespace}-stream-dead-letter-queue-${props.stage}`, {
+        receiveMessageWaitTime: cdk.Duration.seconds(20)
+      })),
       retryAttempts: 3,
       startingPosition: lambda.StartingPosition.TRIM_HORIZON
     }));
 
     // Create a string parameter for the table ARN so other stacks can reference it.
-    new ssm.StringParameter(this, `${props.prefix}-table-arn-${props.stage}`, {
-      parameterName: `${props.prefix}-table-arn-${props.stage}`,
+    new ssm.StringParameter(this, `${props.namespace}-table-arn-${props.stage}`, {
+      parameterName: `${props.namespace}-table-arn-${props.stage}`,
       tier: ssm.ParameterTier.STANDARD,
       stringValue: table.tableArn
     });

@@ -9,7 +9,7 @@ import * as ssm from '@aws-cdk/aws-ssm';
 import { Stage } from './stage';
 
 export interface WebsiteStackProps extends cdk.StackProps {
-  prefix: string;
+  namespace: string;
   stage: Stage;
 }
 
@@ -18,7 +18,7 @@ export class WebsiteStack extends cdk.Stack {
     super(scope, id, props);
 
     // Fetch hosted zone via the domain name.
-    const hostedZone = route53.HostedZone.fromLookup(this, `${props.prefix}-website-hosted-zone-${props.stage}`, {
+    const hostedZone = route53.HostedZone.fromLookup(this, `${props.namespace}-website-hosted-zone-${props.stage}`, {
       domainName: 'millhouse.dev'
     });
 
@@ -26,20 +26,20 @@ export class WebsiteStack extends cdk.Stack {
     const fullDomainName = props.stage === Stage.PROD ? 'millhouse.dev' : `${props.stage}.millhouse.dev`;
 
     // Create a DNS validated certificate for HTTPS. The region has to be 'us-east-1'.
-    const dnsValidatedCertificate = new certificatemanager.DnsValidatedCertificate(this, `${props.prefix}-dns-validated-certificate-${props.stage}`, {
+    const dnsValidatedCertificate = new certificatemanager.DnsValidatedCertificate(this, `${props.namespace}-dns-validated-certificate-${props.stage}`, {
       domainName: fullDomainName,
       hostedZone: hostedZone,
       region: 'us-east-1',
     });
 
     // Create a distribution attached to the S3 bucket and DNS validated certificate.
-    const distribution = new cloudfront.Distribution(this, `${props.prefix}-distribution-${props.stage}`, {
+    const distribution = new cloudfront.Distribution(this, `${props.namespace}-distribution-${props.stage}`, {
       defaultBehavior: {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         origin: new origins.S3Origin(s3.Bucket.fromBucketArn(
           this,
-          `${props.prefix}-origin-bucket-${props.stage}`,
-          ssm.StringParameter.fromStringParameterName(this, `${props.prefix}-origin-bucket-arn-${props.stage}`, `${props.prefix}-bucket-arn-${props.stage}`).stringValue
+          `${props.namespace}-origin-bucket-${props.stage}`,
+          ssm.StringParameter.fromStringParameterName(this, `${props.namespace}-origin-bucket-arn-${props.stage}`, `${props.namespace}-bucket-arn-${props.stage}`).stringValue
         )),
       },
       certificate: dnsValidatedCertificate,
@@ -62,7 +62,7 @@ export class WebsiteStack extends cdk.Stack {
     });
 
     // Create an A record pointing at the web distribution.
-    new route53.ARecord(this, `${props.prefix}-a-record-${props.stage}`, {
+    new route53.ARecord(this, `${props.namespace}-a-record-${props.stage}`, {
       zone: hostedZone,
       recordName: fullDomainName,
       ttl: cdk.Duration.seconds(60),

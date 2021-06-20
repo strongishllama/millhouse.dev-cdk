@@ -14,65 +14,65 @@ const environmentProd = {
   account: checkEnv('AWS_ACCOUNT_PROD'),
   region: checkEnv('AWS_REGION_PROD')
 };
-const prefix = 'millhouse-dev';
+const namespace = 'millhouse-dev';
 
 const app = new cdk.App();
 
 // Development stacks.
-new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.DEV}`, {
+new BootstrapStack(app, `${namespace}-bootstrap-stack-${Stage.DEV}`, {
   env: environmentDev,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.DEV,
   adminTo: checkEnv('ADMIN_TO_DEV'),
   adminFrom: checkEnv('ADMIN_FROM_DEV')
 });
-new ApiStack(app, `${prefix}-api-stack-${Stage.DEV}`, {
+new ApiStack(app, `${namespace}-api-stack-${Stage.DEV}`, {
   env: environmentDev,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.DEV,
   lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_DEV'),
   adminTo: checkEnv('ADMIN_TO_DEV'),
   adminFrom: checkEnv('ADMIN_FROM_DEV')
 });
-new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.DEV}`, {
+new PipelineStack(app, `${namespace}-pipeline-stack-${Stage.DEV}`, {
   env: environmentDev,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.DEV,
   oauthTokenSecretArn: checkEnv('OAUTH_TOKEN_SECRET_ARN'),
   approvalNotifyEmails: checkEnv('APPROVAL_NOTIFY_EMAILS').split(',')
 });
-new WebsiteStack(app, `${prefix}-website-stack-${Stage.DEV}`, {
+new WebsiteStack(app, `${namespace}-website-stack-${Stage.DEV}`, {
   env: environmentDev,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.DEV,
 });
 
 // Production stacks.
-new BootstrapStack(app, `${prefix}-bootstrap-stack-${Stage.PROD}`, {
+new BootstrapStack(app, `${namespace}-bootstrap-stack-${Stage.PROD}`, {
   env: environmentProd,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.PROD,
   adminTo: checkEnv('ADMIN_TO_PROD'),
   adminFrom: checkEnv('ADMIN_FROM_PROD')
 });
-new ApiStack(app, `${prefix}-api-stack-${Stage.PROD}`, {
+new ApiStack(app, `${namespace}-api-stack-${Stage.PROD}`, {
   env: environmentProd,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.PROD,
   lambdasConfigArn: checkEnv('SUBSCRIBE_CONFIG_ARN_PROD'),
   adminTo: checkEnv('ADMIN_TO_PROD'),
   adminFrom: checkEnv('ADMIN_FROM_PROD')
 });
-new PipelineStack(app, `${prefix}-pipeline-stack-${Stage.PROD}`, {
+new PipelineStack(app, `${namespace}-pipeline-stack-${Stage.PROD}`, {
   env: environmentProd,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.PROD,
   oauthTokenSecretArn: checkEnv('OAUTH_TOKEN_SECRET_ARN'),
   approvalNotifyEmails: checkEnv('APPROVAL_NOTIFY_EMAILS').split(',')
 });
-new WebsiteStack(app, `${prefix}-website-stack-${Stage.PROD}`, {
+new WebsiteStack(app, `${namespace}-website-stack-${Stage.PROD}`, {
   env: environmentProd,
-  prefix: prefix,
+  namespace: namespace,
   stage: Stage.PROD,
 });
 
