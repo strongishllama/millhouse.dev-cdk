@@ -17,11 +17,11 @@ func main() {
 
 	tableName, err := env.MustGet("TABLE_NAME")
 	if err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to get environment variable", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
 	if err := db.Initialize("", "", tableName); err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to initialize the db package", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the db package", err)})
 		os.Exit(1)
 	}
 

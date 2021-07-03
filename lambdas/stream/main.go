@@ -17,32 +17,32 @@ func main() {
 
 	emailQueueURL, err := env.MustGet("EMAIL_QUEUE_URL")
 	if err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to get environment variable", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
 	if err := notification.Initialize("", "", emailQueueURL); err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to initialize the notification package", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the notification package", err)})
 		os.Exit(1)
 	}
 
 	handler.AdminTo, err = env.MustGet("ADMIN_TO")
 	if err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to get environment variable", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
 	handler.AdminFrom, err = env.MustGet("ADMIN_FROM")
 	if err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to get environment variable", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
 	handler.APIDomain, err = env.MustGet("API_DOMAIN")
 	if err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to get environment variable", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
 	handler.WebsiteDomain, err = env.MustGet("WEBSITE_DOMAIN")
 	if err != nil {
-		log.Error(log.Fields{"error": xerror.New("failed to get environment variable", err)})
+		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
 

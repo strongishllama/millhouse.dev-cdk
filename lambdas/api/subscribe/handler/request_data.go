@@ -13,11 +13,11 @@ type RequestData struct {
 
 func (r *RequestData) Validate() error {
 	if _, err := mail.ParseAddress(r.EmailAddress); err != nil {
-		return xerror.New("failed to validate EmailAddress", err)
+		return xerror.Wrap("failed to validate EmailAddress", err)
 	}
 
 	if r.ReCaptchaChallengeToken == "" {
-		return xerror.Newf("ReCaptchaChallengeToken cannot be empty")
+		return xerror.New("ReCaptchaChallengeToken cannot be empty")
 	}
 
 	return nil

@@ -47,7 +47,7 @@ func Handle(ctx context.Context, event *events.DynamoDBEvent) error {
 			})
 			if err != nil {
 				log.Error(log.Fields{
-					"error":        xerror.New("failed to enqueue reader unsubscribed email", err),
+					"error":        xerror.Wrap("failed to enqueue reader unsubscribed email", err),
 					"messageId":    messageID,
 					"emailAddress": emailAddress,
 				})
@@ -57,7 +57,7 @@ func Handle(ctx context.Context, event *events.DynamoDBEvent) error {
 		// If it's a INSERT event, unmarshal the subscription and enqueue a subscription confirmation email.
 		var subscription *db.Subscription
 		if err := xlambda.UnmarshalDynamoDBImage(r.Change.NewImage, &subscription); err != nil {
-			return xerror.New("failed to unmarshal DynamoDB record into db.Subscription", err)
+			return xerror.Wrap("failed to unmarshal DynamoDB record into db.Subscription", err)
 		}
 
 		messageID, err := notification.EnqueueEmail(ctx, []string{subscription.EmailAddress}, AdminFrom, notification.EmailTemplate{
@@ -72,7 +72,7 @@ func Handle(ctx context.Context, event *events.DynamoDBEvent) error {
 			},
 		})
 		if err != nil {
-			return xerror.New("failed to enqueue subscription confirmation email", err)
+			return xerror.Wrap("failed to enqueue subscription confirmation email", err)
 		}
 		log.Info(log.Fields{
 			"message":      "successfully enqueued subscription confirmation email",

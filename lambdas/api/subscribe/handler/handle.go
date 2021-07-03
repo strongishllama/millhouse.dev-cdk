@@ -30,16 +30,16 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 	// Unmarshal and validate the request data.
 	var requestData *RequestData
 	if err := json.Unmarshal([]byte(request.Body), &requestData); err != nil {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, "", xerror.New("failed to unmarshal request body into subscribeRequest", err), nil)
+		return xlambda.NewProxyResponse(http.StatusBadRequest, "", xerror.Wrap("failed to unmarshal request body into subscribeRequest", err), nil)
 	}
 	if err := requestData.Validate(); err != nil {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, "", xerror.New("failed to validate request data", err), nil)
+		return xlambda.NewProxyResponse(http.StatusBadRequest, "", xerror.Wrap("failed to validate request data", err), nil)
 	}
 
 	// Verify the recaptcha score.
 	score, err := recaptcha.Verify(ctx, RecaptchaSecret, requestData.ReCaptchaChallengeToken)
 	if err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.New("recaptcha verification failed", err), nil)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.Wrap("recaptcha verification failed", err), nil)
 	}
 
 	// If the score is less than 0.5 enqueue an email notifying the admin, then exit.
@@ -55,7 +55,7 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 		})
 		if err != nil {
 			log.Error(log.Fields{
-				"error":        xerror.New("failed to enqueue recaptcha challenge failed email", err),
+				"error":        xerror.Wrap("failed to enqueue recaptcha challenge failed email", err),
 				"messageId":    messageID,
 				"emailAddress": requestData.EmailAddress,
 				"score":        score,
@@ -68,7 +68,7 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 	// Attempt to check if a subscription with that email already exists. If so, exit now.
 	subscription, err := db.GetSubscription(ctx, requestData.EmailAddress)
 	if err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.New("failed to check if subscription already exists", err), nil)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.Wrap("failed to check if subscription already exists", err), nil)
 	}
 	if subscription != nil {
 		return xlambda.NewProxyResponse(http.StatusOK, "", nil, nil)
@@ -76,7 +76,7 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 
 	// Create the subscription.
 	if _, err = db.CreateSubscription(ctx, requestData.EmailAddress); err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.New("failed to create subscription", err), nil)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.Wrap("failed to create subscription", err), nil)
 	}
 
 	return xlambda.NewProxyResponse(http.StatusOK, "", nil, nil)

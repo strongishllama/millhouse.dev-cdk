@@ -13,11 +13,11 @@ type RequestData struct {
 
 func (r *RequestData) Validate() error {
 	if r.ID == "" {
-		return xerror.Newf("ID cannot be empty")
+		return xerror.New("ID cannot be empty")
 	}
 
 	if _, err := mail.ParseAddress(r.EmailAddress); err != nil {
-		return xerror.New("failed to validate EmailAddress", err)
+		return xerror.Wrap("failed to validate EmailAddress", err)
 	}
 
 	return nil

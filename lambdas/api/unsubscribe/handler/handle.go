@@ -26,17 +26,17 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 	// Fetch the unsubscibe template.
 	data, err := tmpl.NewTemplateFromFile(templates, "templates/unsubscribe-successful.tmpl.html", nil)
 	if err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeTextHTML, xerror.New("failed to create template from file", err), nil)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeTextHTML, xerror.Wrap("failed to create template from file", err), nil)
 	}
 
 	// Pull required query parameters.
 	id, ok := request.QueryStringParameters["id"]
 	if !ok {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeTextHTML, xerror.Newf("required query parameter id is missing"), data)
+		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeTextHTML, xerror.New("required query parameter id is missing"), data)
 	}
 	emailAddress, ok := request.QueryStringParameters["emailAddress"]
 	if !ok {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeTextHTML, xerror.Newf("required query parameter emailAddress is missing"), data)
+		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeTextHTML, xerror.New("required query parameter emailAddress is missing"), data)
 	}
 
 	// Validate request data.
@@ -45,12 +45,12 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 		EmailAddress: emailAddress,
 	}
 	if err := requestData.Validate(); err != nil {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeTextHTML, xerror.New("failed to validate request data", err), data)
+		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeTextHTML, xerror.Wrap("failed to validate request data", err), data)
 	}
 
 	// Delete the subscription.
 	if err := db.DeleteSubscription(ctx, requestData.ID, requestData.EmailAddress); err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeTextHTML, xerror.New("failed to delete subscription", err), data)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeTextHTML, xerror.Wrap("failed to delete subscription", err), data)
 	}
 
 	return xlambda.NewProxyResponse(http.StatusOK, xlambda.ContentTypeTextHTML, nil, data)
