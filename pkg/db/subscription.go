@@ -13,12 +13,12 @@ import (
 
 func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription, error) {
 	if err := checkPackage(); err != nil {
-		return nil, xerror.New("checkPackage failed", err)
+		return nil, xerror.Wrap("checkPackage failed", err)
 	}
 
 	id, err := xrand.UUIDV4()
 	if err != nil {
-		return nil, xerror.New("failed to generate UUID", err)
+		return nil, xerror.Wrap("failed to generate UUID", err)
 	}
 	subscription := &Subscription{
 		ID:           id,
@@ -28,12 +28,12 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 	}
 
 	if err := subscription.Validate(); err != nil {
-		return nil, xerror.New("failed to validate subscription", err)
+		return nil, xerror.Wrap("failed to validate subscription", err)
 	}
 
 	attributeValues, err := dynamodbattribute.MarshalMap(subscription)
 	if err != nil {
-		return nil, xerror.New("failed to marshal subscription into attribute values", err)
+		return nil, xerror.Wrap("failed to marshal subscription into attribute values", err)
 	}
 	attributeValues["pk"] = &dynamodb.AttributeValue{
 		S: aws.String("SUBSCRIPTION#" + subscription.EmailAddress),
@@ -48,11 +48,11 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 	}
 
 	if err := input.Validate(); err != nil {
-		return nil, xerror.New("failed to validate dynamodb.PutItemInput", err)
+		return nil, xerror.Wrap("failed to validate dynamodb.PutItemInput", err)
 	}
 
 	if _, err := DynamoDBClient.PutItemWithContext(ctx, input); err != nil {
-		return nil, xerror.New("failed to put item", err)
+		return nil, xerror.Wrap("failed to put item", err)
 	}
 
 	return subscription, nil
@@ -60,7 +60,7 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 
 func DeleteSubscription(ctx context.Context, id string, emailAddress string) error {
 	if err := checkPackage(); err != nil {
-		return xerror.New("checkPackage failed", err)
+		return xerror.Wrap("checkPackage failed", err)
 	}
 
 	input := &dynamodb.DeleteItemInput{
@@ -76,11 +76,11 @@ func DeleteSubscription(ctx context.Context, id string, emailAddress string) err
 	}
 
 	if err := input.Validate(); err != nil {
-		return xerror.New("failed to validate dynamodb.DeleteItemInput", err)
+		return xerror.Wrap("failed to validate dynamodb.DeleteItemInput", err)
 	}
 
 	if _, err := DynamoDBClient.DeleteItemWithContext(ctx, input); err != nil {
-		return xerror.New("failed to delete subscription", err)
+		return xerror.Wrap("failed to delete subscription", err)
 	}
 
 	return nil
@@ -88,11 +88,11 @@ func DeleteSubscription(ctx context.Context, id string, emailAddress string) err
 
 func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, error) {
 	if err := checkPackage(); err != nil {
-		return nil, xerror.New("checkPackage failed", err)
+		return nil, xerror.Wrap("checkPackage failed", err)
 	}
 
 	if emailAddress == "" {
-		return nil, xerror.Newf("emailAddress cannot be empty")
+		return nil, xerror.New("emailAddress cannot be empty")
 	}
 
 	input := &dynamodb.QueryInput{
@@ -111,12 +111,12 @@ func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, e
 	}
 
 	if err := input.Validate(); err != nil {
-		return nil, xerror.New("failed to validate dynamodb.QueryInput", err)
+		return nil, xerror.Wrap("failed to validate dynamodb.QueryInput", err)
 	}
 
 	output, err := DynamoDBClient.QueryWithContext(ctx, input)
 	if err != nil {
-		return nil, xerror.New("failed to query subscription", err)
+		return nil, xerror.Wrap("failed to query subscription", err)
 	}
 
 	if len(output.Items) == 0 {
@@ -125,7 +125,7 @@ func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, e
 
 	var subscription *Subscription
 	if err := dynamodbattribute.UnmarshalMap(output.Items[0], &subscription); err != nil {
-		return nil, xerror.New("failed to unmarshal attribute values into Subscription", err)
+		return nil, xerror.Wrap("failed to unmarshal attribute values into Subscription", err)
 	}
 
 	return subscription, nil
@@ -140,15 +140,15 @@ type Subscription struct {
 
 func (s *Subscription) Validate() error {
 	if s.EmailAddress == "" {
-		return xerror.Newf("EmailAddress cannot be empty")
+		return xerror.New("EmailAddress cannot be empty")
 	}
 
 	if s.CreatedAt == (time.Time{}) {
-		return xerror.Newf("CreatedAt cannot be empty")
+		return xerror.New("CreatedAt cannot be empty")
 	}
 
 	if s.UpdatedAt == (time.Time{}) {
-		return xerror.Newf("UpdatedAt cannot be empty")
+		return xerror.New("UpdatedAt cannot be empty")
 	}
 
 	return nil

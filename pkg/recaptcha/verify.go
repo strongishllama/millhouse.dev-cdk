@@ -18,7 +18,7 @@ var (
 func Verify(ctx context.Context, secret string, challengeResponseToken string) (float32, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://www.google.com/recaptcha/api/siteverify", nil)
 	if err != nil {
-		return 0, xerror.New("failed to build HTTP request", err)
+		return 0, xerror.Wrap("failed to build HTTP request", err)
 	}
 
 	query := request.URL.Query()
@@ -34,7 +34,7 @@ func Verify(ctx context.Context, secret string, challengeResponseToken string) (
 
 	response, err := HTTPClient.Do(request)
 	if err != nil {
-		return 0, xerror.New("failed to send HTTP request", err)
+		return 0, xerror.Wrap("failed to send HTTP request", err)
 	}
 	defer response.Body.Close()
 
@@ -44,7 +44,7 @@ func Verify(ctx context.Context, secret string, challengeResponseToken string) (
 
 	responseData := &ResponseData{}
 	if err := json.NewDecoder(response.Body).Decode(&responseData); err != nil {
-		return 0, xerror.New("failed to decode response body", err)
+		return 0, xerror.Wrap("failed to decode response body", err)
 	}
 
 	if !responseData.Success {

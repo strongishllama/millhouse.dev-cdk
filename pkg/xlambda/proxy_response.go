@@ -57,7 +57,7 @@ func NewProxyResponse(statusCode int, contentType ContentType, err error, v inte
 
 	if err != nil {
 		log.Error(log.Fields{
-			"error":      xerror.New("api request failed", err),
+			"error":      xerror.Wrap("api request failed", err),
 			"statusCode": response.StatusCode,
 		})
 		return response, nil

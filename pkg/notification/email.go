@@ -14,12 +14,12 @@ import (
 
 func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate EmailTemplate) (string, error) {
 	if err := checkPackage(); err != nil {
-		return "", xerror.New("checkPackage failed", err)
+		return "", xerror.Wrap("checkPackage failed", err)
 	}
 
 	data, err := tmpl.NewTemplateFromFile(templates, "templates/"+emailTemplate.FileName, emailTemplate.Data)
 	if err != nil {
-		return "", xerror.New("failed to create template from file", err)
+		return "", xerror.Wrap("failed to create template from file", err)
 	}
 
 	body, err := json.Marshal(&email.Data{
@@ -30,7 +30,7 @@ func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate E
 		ContentType: emailTemplate.ContentType,
 	})
 	if err != nil {
-		return "", xerror.New("failed to marshal email.Data", err)
+		return "", xerror.Wrap("failed to marshal email.Data", err)
 	}
 
 	input := &sqs.SendMessageInput{
@@ -39,12 +39,12 @@ func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate E
 	}
 
 	if err := input.Validate(); err != nil {
-		return "", xerror.New("failed to validate sqs.SendMessageInput", err)
+		return "", xerror.Wrap("failed to validate sqs.SendMessageInput", err)
 	}
 
 	output, err := SQSClient.SendMessageWithContext(ctx, input)
 	if err != nil {
-		return "", xerror.New("failed to send message to SQS", err)
+		return "", xerror.Wrap("failed to send message to SQS", err)
 	}
 
 	return *output.MessageId, nil
