@@ -5,9 +5,9 @@ go 1.16
 require (
 	github.com/aws/aws-lambda-go v1.26.0
 	github.com/aws/aws-sdk-go v1.40.16
-	github.com/gofor-little/aws-email v0.1.1
+	github.com/gofor-little/aws-email v0.2.0
 	github.com/gofor-little/cfg v0.3.0
-	github.com/gofor-little/env v0.4.4
+	github.com/gofor-little/env v1.0.0
 	github.com/gofor-little/log v0.3.6
 	github.com/gofor-little/xerror v0.4.0
 	github.com/gofor-little/xrand v0.3.1
