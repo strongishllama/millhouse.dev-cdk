@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -20,7 +21,7 @@ func main() {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
-	if err := notification.Initialize("", "", emailQueueURL); err != nil {
+	if err := notification.Initialize(context.Background(), "", "", emailQueueURL); err != nil {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the notification package", err)})
 		os.Exit(1)
 	}

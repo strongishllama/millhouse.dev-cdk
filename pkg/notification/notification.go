@@ -1,43 +1,38 @@
 package notification
 
 import (
+	"context"
 	"embed"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/gofor-little/xerror"
 )
 
 var (
-	SQSClient sqsiface.SQSAPI
+	SQSClient *sqs.Client
 	QueueURL  string
 
 	//go:embed templates
 	templates embed.FS
 )
 
-func Initialize(profile string, region string, queueURL string) error {
-	var sess *session.Session
+func Initialize(ctx context.Context, profile string, region string, queueURL string) error {
+	var cfg aws.Config
 	var err error
 
 	if profile != "" && region != "" {
-		sess, err = session.NewSessionWithOptions(session.Options{
-			Config: aws.Config{
-				Region: aws.String(region),
-			},
-			Profile: profile,
-		})
+		cfg, err = config.LoadDefaultConfig(ctx, config.WithSharedConfigProfile(profile), config.WithRegion(region))
 	} else {
-		sess, err = session.NewSession()
+		cfg, err = config.LoadDefaultConfig(ctx)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to create session.Session: %w", err)
+		return fmt.Errorf("failed to load default config: %w", err)
 	}
 
-	SQSClient = sqs.New(sess)
+	SQSClient = sqs.NewFromConfig(cfg)
 	QueueURL = queueURL
 
 	return nil

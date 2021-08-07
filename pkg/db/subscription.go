@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/gofor-little/xerror"
 	"github.com/gofor-little/xrand"
 )
@@ -31,15 +32,15 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 		return nil, xerror.Wrap("failed to validate subscription", err)
 	}
 
-	attributeValues, err := dynamodbattribute.MarshalMap(subscription)
+	attributeValues, err := attributevalue.MarshalMap(subscription)
 	if err != nil {
 		return nil, xerror.Wrap("failed to marshal subscription into attribute values", err)
 	}
-	attributeValues["pk"] = &dynamodb.AttributeValue{
-		S: aws.String("SUBSCRIPTION#" + subscription.EmailAddress),
+	attributeValues["pk"] = &types.AttributeValueMemberS{
+		Value: "SUBSCRIPTION#" + subscription.EmailAddress,
 	}
-	attributeValues["sk"] = &dynamodb.AttributeValue{
-		S: aws.String("SUBSCRIPTION#" + subscription.ID),
+	attributeValues["sk"] = &types.AttributeValueMemberS{
+		Value: "SUBSCRIPTION#" + subscription.ID,
 	}
 
 	input := &dynamodb.PutItemInput{
@@ -47,11 +48,7 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 		TableName: aws.String(TableName),
 	}
 
-	if err := input.Validate(); err != nil {
-		return nil, xerror.Wrap("failed to validate dynamodb.PutItemInput", err)
-	}
-
-	if _, err := DynamoDBClient.PutItemWithContext(ctx, input); err != nil {
+	if _, err := DynamoDBClient.PutItem(ctx, input); err != nil {
 		return nil, xerror.Wrap("failed to put item", err)
 	}
 
@@ -64,22 +61,18 @@ func DeleteSubscription(ctx context.Context, id string, emailAddress string) err
 	}
 
 	input := &dynamodb.DeleteItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"pk": {
-				S: aws.String("SUBSCRIPTION#" + emailAddress),
+		Key: map[string]types.AttributeValue{
+			"pk": &types.AttributeValueMemberS{
+				Value: "SUBSCRIPTION#" + emailAddress,
 			},
-			"sk": {
-				S: aws.String("SUBSCRIPTION#" + id),
+			"sk": &types.AttributeValueMemberS{
+				Value: "SUBSCRIPTION#" + id,
 			},
 		},
 		TableName: aws.String(TableName),
 	}
 
-	if err := input.Validate(); err != nil {
-		return xerror.Wrap("failed to validate dynamodb.DeleteItemInput", err)
-	}
-
-	if _, err := DynamoDBClient.DeleteItemWithContext(ctx, input); err != nil {
+	if _, err := DynamoDBClient.DeleteItem(ctx, input); err != nil {
 		return xerror.Wrap("failed to delete subscription", err)
 	}
 
@@ -96,25 +89,21 @@ func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, e
 	}
 
 	input := &dynamodb.QueryInput{
-		KeyConditions: map[string]*dynamodb.Condition{
+		KeyConditions: map[string]types.Condition{
 			"pk": {
-				ComparisonOperator: aws.String(dynamodb.ComparisonOperatorEq),
-				AttributeValueList: []*dynamodb.AttributeValue{
-					{
-						S: aws.String("SUBSCRIPTION#" + emailAddress),
+				ComparisonOperator: types.ComparisonOperatorEq,
+				AttributeValueList: []types.AttributeValue{
+					&types.AttributeValueMemberS{
+						Value: "SUBSCRIPTION#" + emailAddress,
 					},
 				},
 			},
 		},
-		Limit:     aws.Int64(1),
+		Limit:     aws.Int32(1),
 		TableName: aws.String(TableName),
 	}
 
-	if err := input.Validate(); err != nil {
-		return nil, xerror.Wrap("failed to validate dynamodb.QueryInput", err)
-	}
-
-	output, err := DynamoDBClient.QueryWithContext(ctx, input)
+	output, err := DynamoDBClient.Query(ctx, input)
 	if err != nil {
 		return nil, xerror.Wrap("failed to query subscription", err)
 	}
@@ -124,7 +113,7 @@ func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, e
 	}
 
 	var subscription *Subscription
-	if err := dynamodbattribute.UnmarshalMap(output.Items[0], &subscription); err != nil {
+	if err := attributevalue.UnmarshalMap(output.Items[0], &subscription); err != nil {
 		return nil, xerror.Wrap("failed to unmarshal attribute values into Subscription", err)
 	}
 

@@ -8,10 +8,10 @@ import (
 	email "github.com/gofor-little/aws-email"
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xerror"
+	"github.com/strongishllama/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/notification"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/xlambda"
 )
 
 const (
@@ -54,9 +54,9 @@ func Handle(ctx context.Context, event *events.DynamoDBEvent) error {
 			}
 		}
 
-		// If it's a INSERT event, unmarshal the subscription and enqueue a subscription confirmation email.
+		// If it's an INSERT event, unmarshal the subscription and enqueue a subscription confirmation email.
 		var subscription *db.Subscription
-		if err := xlambda.UnmarshalDynamoDBImage(r.Change.NewImage, &subscription); err != nil {
+		if err := xlambda.UnmarshalDynamoDBEventAttributeValues(r.Change.NewImage, &subscription); err != nil {
 			return xerror.Wrap("failed to unmarshal DynamoDB record into db.Subscription", err)
 		}
 

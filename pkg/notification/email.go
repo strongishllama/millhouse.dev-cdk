@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	email "github.com/gofor-little/aws-email"
 	"github.com/gofor-little/xerror"
 
@@ -38,11 +38,7 @@ func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate E
 		QueueUrl:    aws.String(QueueURL),
 	}
 
-	if err := input.Validate(); err != nil {
-		return "", xerror.Wrap("failed to validate sqs.SendMessageInput", err)
-	}
-
-	output, err := SQSClient.SendMessageWithContext(ctx, input)
+	output, err := SQSClient.SendMessage(ctx, input)
 	if err != nil {
 		return "", xerror.Wrap("failed to send message to SQS", err)
 	}

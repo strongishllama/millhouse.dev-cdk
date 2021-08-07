@@ -9,16 +9,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
 	"github.com/stretchr/testify/require"
+	"github.com/strongishllama/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/xlambda"
 )
 
 var (
@@ -47,35 +47,34 @@ func setup(t *testing.T) *db.Subscription {
 	}
 
 	log.Log = log.NewStandardLogger(os.Stdout, nil)
-	require.NoError(t, db.Initialize(env.Get("TEST_AWS_PROFILE", ""), env.Get("TEST_AWS_REGION", ""), fmt.Sprintf("millhouse-dev-handle-test_%d", time.Now().Unix())))
+	require.NoError(t, db.Initialize(context.Background(), env.Get("TEST_AWS_PROFILE", ""), env.Get("TEST_AWS_REGION", ""), fmt.Sprintf("millhouse-dev-handle-test_%d", time.Now().Unix())))
 
 	input := &dynamodb.CreateTableInput{
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+		AttributeDefinitions: []types.AttributeDefinition{
 			{
 				AttributeName: aws.String("pk"),
-				AttributeType: aws.String(dynamodb.ScalarAttributeTypeS),
+				AttributeType: types.ScalarAttributeTypeS,
 			},
 			{
 				AttributeName: aws.String("sk"),
-				AttributeType: aws.String(dynamodb.ScalarAttributeTypeS),
+				AttributeType: types.ScalarAttributeTypeS,
 			},
 		},
-		BillingMode: aws.String(dynamodb.BillingModePayPerRequest),
-		KeySchema: []*dynamodb.KeySchemaElement{
+		BillingMode: types.BillingModePayPerRequest,
+		KeySchema: []types.KeySchemaElement{
 			{
 				AttributeName: aws.String("pk"),
-				KeyType:       aws.String(dynamodb.KeyTypeHash),
+				KeyType:       types.KeyTypeHash,
 			},
 			{
 				AttributeName: aws.String("sk"),
-				KeyType:       aws.String(dynamodb.KeyTypeRange),
+				KeyType:       types.KeyTypeRange,
 			},
 		},
 		TableName: aws.String(db.TableName),
 	}
-	require.NoError(t, input.Validate())
 
-	_, err := db.DynamoDBClient.CreateTable(input)
+	_, err := db.DynamoDBClient.CreateTable(context.Background(), input)
 	require.NoError(t, err)
 
 	return createSubscription(t)
@@ -85,12 +84,11 @@ func teardown(t *testing.T) {
 	input := &dynamodb.DeleteTableInput{
 		TableName: aws.String(db.TableName),
 	}
-	require.NoError(t, input.Validate())
 
-	_, err := db.DynamoDBClient.DeleteTable(input)
+	_, err := db.DynamoDBClient.DeleteTable(context.Background(), input)
 	if err != nil && teardownSleep <= 30 {
-		aerr, ok := err.(awserr.Error)
-		if !ok || aerr.Code() != dynamodb.ErrCodeResourceInUseException {
+		aerr := &types.ResourceInUseException{}
+		if !errors.As(err, &aerr) {
 			require.NoError(t, err)
 		}
 
@@ -109,8 +107,8 @@ func teardown(t *testing.T) {
 func createSubscription(t *testing.T) *db.Subscription {
 	subscription, err := db.CreateSubscription(context.Background(), "test@example.com")
 	if err != nil && setupSleep <= 30 {
-		aerr, ok := errors.Unwrap(err).(awserr.Error)
-		if !ok || aerr.Code() != dynamodb.ErrCodeResourceNotFoundException {
+		aerr := &types.ResourceNotFoundException{}
+		if !errors.As(err, &aerr) {
 			require.NoError(t, err)
 		}
 

@@ -1,39 +1,34 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gofor-little/xerror"
 )
 
 var (
-	DynamoDBClient dynamodbiface.DynamoDBAPI
+	DynamoDBClient *dynamodb.Client
 	TableName      string
 )
 
-func Initialize(profile string, region string, tableName string) error {
-	var sess *session.Session
+func Initialize(ctx context.Context, profile string, region string, tableName string) error {
+	var cfg aws.Config
 	var err error
 
 	if profile != "" && region != "" {
-		sess, err = session.NewSessionWithOptions(session.Options{
-			Config: aws.Config{
-				Region: aws.String(region),
-			},
-			Profile: profile,
-		})
+		cfg, err = config.LoadDefaultConfig(ctx, config.WithSharedConfigProfile(profile), config.WithRegion(region))
 	} else {
-		sess, err = session.NewSession()
+		cfg, err = config.LoadDefaultConfig(ctx)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to create session.Session: %w", err)
+		return fmt.Errorf("failed to load default config: %w", err)
 	}
 
-	DynamoDBClient = dynamodb.New(sess)
+	DynamoDBClient = dynamodb.NewFromConfig(cfg)
 	TableName = tableName
 
 	return nil
@@ -41,11 +36,11 @@ func Initialize(profile string, region string, tableName string) error {
 
 func checkPackage() error {
 	if DynamoDBClient == nil {
-		return xerror.Newf("db.DynamoDBClient is nil, have you called db.Initialize()?")
+		return xerror.New("db.DynamoDBClient is nil, have you called db.Initialize()?")
 	}
 
 	if TableName == "" {
-		return xerror.Newf("db.TableName is empty, did you call db.Initialize()?")
+		return xerror.New("db.TableName is empty, did you call db.Initialize()?")
 	}
 
 	return nil

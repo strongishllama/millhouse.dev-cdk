@@ -2,18 +2,18 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
+	"net/mail"
 
 	"github.com/aws/aws-lambda-go/events"
 	email "github.com/gofor-little/aws-email"
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xerror"
+	"github.com/strongishllama/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/notification"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/recaptcha"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/xlambda"
 )
 
 var (
@@ -24,22 +24,19 @@ var (
 
 func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	if request.HTTPMethod != http.MethodPut {
-		return xlambda.NewProxyResponse(http.StatusMethodNotAllowed, "", nil, nil)
+		return xlambda.NewProxyResponse(http.StatusMethodNotAllowed, xlambda.ContentTypeApplicationJSON, nil, nil)
 	}
 
 	// Unmarshal and validate the request data.
-	var requestData *RequestData
-	if err := json.Unmarshal([]byte(request.Body), &requestData); err != nil {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, "", xerror.Wrap("failed to unmarshal request body into subscribeRequest", err), nil)
-	}
-	if err := requestData.Validate(); err != nil {
-		return xlambda.NewProxyResponse(http.StatusBadRequest, "", xerror.Wrap("failed to validate request data", err), nil)
+	data := &RequestData{}
+	if err := xlambda.UnmarshalAndValidate(request, data); err != nil {
+		return xlambda.NewProxyResponse(http.StatusBadRequest, xlambda.ContentTypeApplicationJSON, xerror.Wrap("failed to unmarshal and validate request data", err), nil)
 	}
 
 	// Verify the recaptcha score.
-	score, err := recaptcha.Verify(ctx, RecaptchaSecret, requestData.ReCaptchaChallengeToken)
+	score, err := recaptcha.Verify(ctx, RecaptchaSecret, data.ReCaptchaChallengeToken)
 	if err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.Wrap("recaptcha verification failed", err), nil)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeApplicationJSON, xerror.Wrap("recaptcha verification failed", err), nil)
 	}
 
 	// If the score is less than 0.5 enqueue an email notifying the admin, then exit.
@@ -49,7 +46,7 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 			Subject:     "Recaptcha Challenge Failed",
 			ContentType: email.ContentTypeTextHTML,
 			Data: notification.RecaptchaChallengeFailedTemplateData{
-				EmailAddress: requestData.EmailAddress,
+				EmailAddress: data.EmailAddress,
 				Score:        score,
 			},
 		})
@@ -57,7 +54,7 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 			log.Error(log.Fields{
 				"error":        xerror.Wrap("failed to enqueue recaptcha challenge failed email", err),
 				"messageId":    messageID,
-				"emailAddress": requestData.EmailAddress,
+				"emailAddress": data.EmailAddress,
 				"score":        score,
 			})
 		}
@@ -66,18 +63,35 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 	}
 
 	// Attempt to check if a subscription with that email already exists. If so, exit now.
-	subscription, err := db.GetSubscription(ctx, requestData.EmailAddress)
+	subscription, err := db.GetSubscription(ctx, data.EmailAddress)
 	if err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.Wrap("failed to check if subscription already exists", err), nil)
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeApplicationJSON, xerror.Wrap("failed to check if subscription already exists", err), nil)
 	}
 	if subscription != nil {
-		return xlambda.NewProxyResponse(http.StatusOK, "", nil, nil)
+		return xlambda.NewProxyResponse(http.StatusOK, xlambda.ContentTypeApplicationJSON, nil, nil)
 	}
 
 	// Create the subscription.
-	if _, err = db.CreateSubscription(ctx, requestData.EmailAddress); err != nil {
-		return xlambda.NewProxyResponse(http.StatusInternalServerError, "", xerror.Wrap("failed to create subscription", err), nil)
+	if _, err = db.CreateSubscription(ctx, data.EmailAddress); err != nil {
+		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeApplicationJSON, xerror.Wrap("failed to create subscription", err), nil)
 	}
 
-	return xlambda.NewProxyResponse(http.StatusOK, "", nil, nil)
+	return xlambda.NewProxyResponse(http.StatusOK, xlambda.ContentTypeApplicationJSON, nil, nil)
+}
+
+type RequestData struct {
+	EmailAddress            string `json:"emailAddress"`
+	ReCaptchaChallengeToken string `json:"recaptchaChallengeToken"`
+}
+
+func (r *RequestData) Validate() error {
+	if _, err := mail.ParseAddress(r.EmailAddress); err != nil {
+		return xerror.Wrap("failed to validate EmailAddress", err)
+	}
+
+	if r.ReCaptchaChallengeToken == "" {
+		return xerror.New("ReCaptchaChallengeToken cannot be empty")
+	}
+
+	return nil
 }

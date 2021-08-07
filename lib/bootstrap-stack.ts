@@ -4,7 +4,6 @@ import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as go_lambda from '@aws-cdk/aws-lambda-go';
 import * as lambda_events from '@aws-cdk/aws-lambda-event-sources';
-import * as s3 from '@aws-cdk/aws-s3';
 import * as ssm from '@aws-cdk/aws-ssm';
 import * as sqs from '@aws-cdk/aws-sqs';
 import { EmailService } from '@strongishllama/email-service-cdk';
@@ -27,25 +26,10 @@ export class BootstrapStack extends cdk.Stack {
       throw Error('Error: env property is undefined and is required to deploy this stack');
     }
 
-    // Create an bucket to store the compiled website code.
-    const bucket = new s3.Bucket(this, `${props.namespace}-bucket-${props.stage}`, {
-      publicReadAccess: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-      websiteIndexDocument: 'index.html'
-    });
-
-    // Create a string parameter for the bucket ARN so other stacks can reference it.
-    new ssm.StringParameter(this, `${props.namespace}-bucket-arn-${props.stage}`, {
-      parameterName: `${props.namespace}-bucket-arn-${props.stage}`,
-      tier: ssm.ParameterTier.STANDARD,
-      stringValue: bucket.bucketArn
-    });
-
     // Create the email service.
     const emailService = new EmailService(this, `${props.namespace}-email-service-${props.stage}`, {
-      prefix: props.namespace,
-      suffix: props.stage,
+      namespace: props.namespace,
+      stage: props.stage,
       receiveMessageWaitTime: cdk.Duration.seconds(20)
     });
 

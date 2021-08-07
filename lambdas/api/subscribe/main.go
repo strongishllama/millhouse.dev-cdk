@@ -9,6 +9,7 @@ import (
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xerror"
+	"github.com/strongishllama/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/subscribe/handler"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
@@ -23,7 +24,7 @@ func main() {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
-	if err := db.Initialize("", "", tableName); err != nil {
+	if err := db.Initialize(context.Background(), "", "", tableName); err != nil {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the db package", err)})
 		os.Exit(1)
 	}
@@ -33,7 +34,7 @@ func main() {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
 		os.Exit(1)
 	}
-	if err := notification.Initialize("", "", emailQueueURL); err != nil {
+	if err := notification.Initialize(context.Background(), "", "", emailQueueURL); err != nil {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the notifications package", err)})
 		os.Exit(1)
 	}
@@ -58,6 +59,8 @@ func main() {
 		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the cfg package", err)})
 		os.Exit(1)
 	}
+
+	xlambda.AccessControlAllowOrigin = env.Get("ACCESS_CONTROL_ALLOW_ORIGIN", "*")
 
 	config := &struct {
 		RecaptchaSecret string `json:"recaptchaSecret"`

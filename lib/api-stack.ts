@@ -63,6 +63,7 @@ export class ApiStack extends cdk.Stack {
       entry: 'lambdas/api/subscribe',
       bundling: bundling,
       environment: {
+        'ACCESS_CONTROL_ALLOW_ORIGIN': props.stage === Stage.PROD ? 'https://millhouse.dev' : '*',
         'ADMIN_TO': props.adminTo,
         'ADMIN_FROM': props.adminFrom,
         'CONFIG_SECRET_ARN': props.lambdasConfigArn,
@@ -105,7 +106,7 @@ export class ApiStack extends cdk.Stack {
       entry: 'lambdas/api/unsubscribe',
       bundling: bundling,
       environment: {
-        'STAGE': props.stage,
+        'ACCESS_CONTROL_ALLOW_ORIGIN': props.stage === Stage.PROD ? 'https://millhouse.dev' : 'https://dev.millhouse.dev',
         'TABLE_NAME': table.tableName
       },
       initialPolicy: [

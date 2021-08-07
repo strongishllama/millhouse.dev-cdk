@@ -4,13 +4,14 @@ import (
 	"context"
 	"embed"
 	"net/http"
+	"net/mail"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/gofor-little/xerror"
+	"github.com/strongishllama/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/tmpl"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/xlambda"
 )
 
 var (
@@ -23,7 +24,7 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 		return xlambda.NewProxyResponse(http.StatusMethodNotAllowed, "", nil, nil)
 	}
 
-	// Fetch the unsubscibe template.
+	// Fetch the unsubscribe template.
 	data, err := tmpl.NewTemplateFromFile(templates, "templates/unsubscribe-successful.tmpl.html", nil)
 	if err != nil {
 		return xlambda.NewProxyResponse(http.StatusInternalServerError, xlambda.ContentTypeTextHTML, xerror.Wrap("failed to create template from file", err), nil)
@@ -54,4 +55,21 @@ func Handle(ctx context.Context, request *events.APIGatewayProxyRequest) (*event
 	}
 
 	return xlambda.NewProxyResponse(http.StatusOK, xlambda.ContentTypeTextHTML, nil, data)
+}
+
+type RequestData struct {
+	ID           string `json:"id"`
+	EmailAddress string `json:"emailAddress"`
+}
+
+func (r *RequestData) Validate() error {
+	if r.ID == "" {
+		return xerror.New("ID cannot be empty")
+	}
+
+	if _, err := mail.ParseAddress(r.EmailAddress); err != nil {
+		return xerror.Wrap("failed to validate EmailAddress", err)
+	}
+
+	return nil
 }
