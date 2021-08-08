@@ -1,4 +1,5 @@
 import * as cdk from '@aws-cdk/core';
+import * as backup from '@aws-cdk/aws-backup';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda';
@@ -92,5 +93,15 @@ export class BootstrapStack extends cdk.Stack {
       tier: ssm.ParameterTier.STANDARD,
       stringValue: table.tableArn
     });
+
+    // If we're running in production, create a backup plan for the DynamoDB table.
+    if (props.stage === Stage.PROD) {
+      const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, `${props.namespace}-backup-plan-${props.stage}`);
+      backupPlan.addSelection(`${props.namespace}-selection-${props.stage}`, {
+        resources: [
+          backup.BackupResource.fromDynamoDbTable(table)
+        ]
+      });
+    }
   }
 }

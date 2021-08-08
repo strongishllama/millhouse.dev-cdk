@@ -21,6 +21,7 @@
     "typescript": "~4.2.4"
   },
   "dependencies": {
+    "@aws-cdk/aws-backup": "1.117.0",
     "@aws-cdk/aws-certificatemanager": "1.117.0",
     "@aws-cdk/aws-cloudfront": "1.117.0",
     "@aws-cdk/aws-cloudfront-origins": "1.117.0",
