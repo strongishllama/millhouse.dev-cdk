@@ -3,8 +3,9 @@ github.com/aws/aws-lambda-go v1.26.0 h1:6ujqBpYF7tdZcBvPIccs98SpeGfrt/UOVEiexfNI
 github.com/aws/aws-lambda-go v1.26.0/go.mod h1:jJmlefzPfGnckuHdXX7/80O3BvUUi12XOkbv4w9SGLU=
 github.com/aws/aws-sdk-go-v2 v1.7.0/go.mod h1:tb9wi5s61kTDA5qCkcDbt3KRVV74GGslQkl/DRdX/P4=
 github.com/aws/aws-sdk-go-v2 v1.7.1/go.mod h1:L5LuPC1ZgDr2xQS7AmIec/Jlc7O/Y1u2KxJyNVab250=
-github.com/aws/aws-sdk-go-v2 v1.8.0 h1:HcN6yDnHV9S7D69E7To0aUppJhiJNEzQSNcUxc7r3qo=
 github.com/aws/aws-sdk-go-v2 v1.8.0/go.mod h1:xEFuWz+3TYdlPRuo+CqATbeDWIWyaT5uAPwPaWtgse0=
+github.com/aws/aws-sdk-go-v2 v1.8.1 h1:GcFgQl7MsBygmeeqXyV1ivrTEmsVz/rdFJaTcltG9ag=
+github.com/aws/aws-sdk-go-v2 v1.8.1/go.mod h1:xEFuWz+3TYdlPRuo+CqATbeDWIWyaT5uAPwPaWtgse0=
 github.com/aws/aws-sdk-go-v2/config v1.4.0/go.mod h1:lSD+PE8OsriBSidyfYyAadDrbJrUJTlBd3IF0qXkszQ=
 github.com/aws/aws-sdk-go-v2/config v1.5.0/go.mod h1:RWlPOAW3E3tbtNAqTwvSW54Of/yP3oiZXMI0xfUdjyA=
 github.com/aws/aws-sdk-go-v2/config v1.6.0 h1:rtoCnNObhVm7me+v9sA2aY+NtHNZjjWWC3ifXVci+wE=
@@ -48,8 +49,8 @@ github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.4.0 h1:ZbAoLM9/YQh+zV6PN9
 github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.4.0/go.mod h1:ohaAiY87rOsvnSnD2Fk79hSutpuz+f4XmnUPq4B52y8=
 github.com/aws/aws-sdk-go-v2/service/ses v1.5.0 h1:mBl12OhygqLfam8RAau1zQ53ywSfuBmkU/Iki6CRDJE=
 github.com/aws/aws-sdk-go-v2/service/ses v1.5.0/go.mod h1:/8h+BD7V2slHXHwUWzvM1LZ94djCvsA4jJI1/jQmJkU=
-github.com/aws/aws-sdk-go-v2/service/sqs v1.7.1 h1:PbG+RpR5P91p+VB7somwlP4XRlbwgT2q3kxxBxr7xbM=
-github.com/aws/aws-sdk-go-v2/service/sqs v1.7.1/go.mod h1:7cXocuYx/NzeI/VS3pWStOyQQo/JafG3uglH1M5nME8=
+github.com/aws/aws-sdk-go-v2/service/sqs v1.7.2 h1:RFCFJzkGKSpVQZiTyMgoW3V7/uFIUFip5t6ljvD+Uo0=
+github.com/aws/aws-sdk-go-v2/service/sqs v1.7.2/go.mod h1:TGLWOGp2jII8DZhzRUQXcrsYMvk7fqz8zYdNPq4YQ8Y=
 github.com/aws/aws-sdk-go-v2/service/sso v1.3.0/go.mod h1:qWR+TUuvfji9udM79e4CPe87C5+SjMEb2TFXkZaI0Vc=
 github.com/aws/aws-sdk-go-v2/service/sso v1.3.1/go.mod h1:J3A3RGUvuCZjvSuZEcOpHDnzZP/sKbhDWV2T1EOzFIM=
 github.com/aws/aws-sdk-go-v2/service/sso v1.3.2 h1:b+U3WrF9ON3f32FH19geqmiod4uKcMv/q+wosQjjyyM=
