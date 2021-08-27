@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.7.2
 	github.com/gofor-little/aws-email v0.2.1
 	github.com/gofor-little/cfg v0.3.1
-	github.com/gofor-little/env v1.0.0
+	github.com/gofor-little/env v1.0.1
 	github.com/gofor-little/log v1.0.1
 	github.com/gofor-little/xerror v0.5.0
 	github.com/gofor-little/xrand v0.3.2
