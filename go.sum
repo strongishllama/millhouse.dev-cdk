@@ -89,8 +89,8 @@ github.com/gofor-little/ts v0.2.6/go.mod h1:oP+s46Ng2FGjr17VOrjn2akcltjHFdtB9QuG
 github.com/gofor-little/xerror v0.4.0/go.mod h1:wjsFMng4jjalKHCSIocghCPYXEHqdpkb37EHTwrlj2I=
 github.com/gofor-little/xerror v0.4.1 h1:JKyvOoiCZgPGkLgO17m8jijOY11wlsGO8/OqlcZu2j0=
 github.com/gofor-little/xerror v0.4.1/go.mod h1:wjsFMng4jjalKHCSIocghCPYXEHqdpkb37EHTwrlj2I=
-github.com/gofor-little/xrand v0.3.1 h1:SLnRsRRaNw09rgSZROWZzuzCs/8eu9EMHHqTSOCD1Xc=
-github.com/gofor-little/xrand v0.3.1/go.mod h1:qmsRA3PSgi1DIhvNECjzfJr2uN0qosiMjDQcVs5BDOY=
+github.com/gofor-little/xrand v0.3.2 h1:ySYG2JWULagX8OmG2/cVp4AwHdpCUZtDj9mnJvZExiY=
+github.com/gofor-little/xrand v0.3.2/go.mod h1:/cpS1F+0OCDmC5kCS1ND2Caf1KYXc6rVHHXKaXdE3BM=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.6 h1:BKbKCqvP6I+rmFHt06ZmyQtvB8xAkWdhFyr0ZUNZcxQ=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
