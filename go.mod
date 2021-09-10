@@ -13,7 +13,7 @@ require (
 	github.com/gofor-little/cfg v0.3.1
 	github.com/gofor-little/env v1.0.2
 	github.com/gofor-little/log v1.0.2
-	github.com/gofor-little/xerror v0.5.0
+	github.com/gofor-little/xerror v0.5.1
 	github.com/gofor-little/xrand v0.3.2
 	github.com/stretchr/testify v1.7.0
 	github.com/strongishllama/xlambda v0.4.1
