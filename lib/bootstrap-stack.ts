@@ -8,15 +8,15 @@ import * as lambda_events from '@aws-cdk/aws-lambda-event-sources';
 import * as ssm from '@aws-cdk/aws-ssm';
 import * as sqs from '@aws-cdk/aws-sqs';
 import { EmailService } from '@strongishllama/email-service-cdk';
-import { SQS } from '@strongishllama/iam-constants-cdk';
+import { SQS } from '@strongishllama/aws-iam-constants';
 import { bundling } from './lambda';
-import { Stage } from './stage';
 
 export interface BootstrapStackProps extends cdk.StackProps {
-  namespace: string;
-  stage: Stage;
-  adminTo: string;
-  adminFrom: string;
+  readonly tableRemovalPolicy: cdk.RemovalPolicy;
+  readonly enableBackups: boolean;
+  readonly fromAddress: string;
+  readonly apiDomainName: string;
+  readonly websiteDomainName: string;
 }
 
 export class BootstrapStack extends cdk.Stack {
@@ -24,25 +24,14 @@ export class BootstrapStack extends cdk.Stack {
     super(scope, id, props);
 
     if (props.env === undefined || props.env.account === undefined || props.env.region === undefined) {
-      throw Error('Error: env property is undefined and is required to deploy this stack');
+      throw Error('BootstrapStackProps.env property must be fully defined.');
     }
 
-    // Create the email service.
-    const emailService = new EmailService(this, `${props.namespace}-email-service-${props.stage}`, {
-      namespace: props.namespace,
-      stage: props.stage,
+    const emailService = new EmailService(this, 'email-service', {
       receiveMessageWaitTime: cdk.Duration.seconds(20)
     });
 
-    // Create a string parameter for the queue ARN so other stacks can reference it.
-    new ssm.StringParameter(this, `${props.namespace}-queue-arn-${props.stage}`, {
-      parameterName: `${props.namespace}-email-queue-${props.stage}`,
-      tier: ssm.ParameterTier.STANDARD,
-      stringValue: emailService.queue.queueArn
-    });
-
-    // Create a table to store subscription emails.
-    const table = new dynamodb.Table(this, `${props.namespace}-table-${props.stage}`, {
+    const table = new dynamodb.Table(this, 'table', {
       partitionKey: {
         name: 'pk',
         type: dynamodb.AttributeType.STRING
@@ -53,19 +42,17 @@ export class BootstrapStack extends cdk.Stack {
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       stream: dynamodb.StreamViewType.NEW_IMAGE,
-      removalPolicy: props.stage === Stage.PROD ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY
+      removalPolicy: props.tableRemovalPolicy
     });
 
-    // Create a function to receive stream events from the table and add it as an event source.
-    const streamFunction = new go_lambda.GoFunction(this, `${props.namespace}-stream-functions-${props.stage}`, {
+    const streamFunction = new go_lambda.GoFunction(this, 'stream-function', {
       entry: 'lambdas/stream',
       bundling: bundling,
       environment: {
-        'ADMIN_TO': props.adminTo,
-        'ADMIN_FROM': props.adminFrom,
+        'FROM_ADDRESS': props.fromAddress,
         'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
-        'API_DOMAIN': props.stage === Stage.PROD ? 'api.millhouse.dev' : 'dev.api.millhouse.dev',
-        'WEBSITE_DOMAIN': props.stage === Stage.PROD ? 'millhouse.dev' : 'dev.millhouse.dev'
+        'API_DOMAIN': props.apiDomainName,
+        'WEBSITE_DOMAIN': props.websiteDomainName
       },
       initialPolicy: [
         new iam.PolicyStatement({
@@ -80,28 +67,31 @@ export class BootstrapStack extends cdk.Stack {
     });
     streamFunction.addEventSource(new lambda_events.DynamoEventSource(table, {
       bisectBatchOnError: true,
-      onFailure: new lambda_events.SqsDlq(new sqs.Queue(this, `${props.namespace}-stream-dead-letter-queue-${props.stage}`, {
+      onFailure: new lambda_events.SqsDlq(new sqs.Queue(this, 'stream-dead-letter-queue', {
         receiveMessageWaitTime: cdk.Duration.seconds(20)
       })),
       retryAttempts: 3,
       startingPosition: lambda.StartingPosition.TRIM_HORIZON
     }));
 
-    // Create a string parameter for the table ARN so other stacks can reference it.
-    new ssm.StringParameter(this, `${props.namespace}-table-arn-${props.stage}`, {
-      parameterName: `${props.namespace}-table-arn-${props.stage}`,
-      tier: ssm.ParameterTier.STANDARD,
-      stringValue: table.tableArn
-    });
-
-    // If we're running in production, create a backup plan for the DynamoDB table.
-    if (props.stage === Stage.PROD) {
-      const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, `${props.namespace}-backup-plan-${props.stage}`);
-      backupPlan.addSelection(`${props.namespace}-selection-${props.stage}`, {
+    if (props.enableBackups) {
+      const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'backup-plan');
+      backupPlan.addSelection('selection', {
         resources: [
           backup.BackupResource.fromDynamoDbTable(table)
         ]
       });
     }
+
+    new ssm.StringParameter(this, 'table-arn', {
+      parameterName: 'table-arn',
+      tier: ssm.ParameterTier.STANDARD,
+      stringValue: table.tableArn
+    });
+    new ssm.StringParameter(this, 'queue-arn', {
+      parameterName: 'email-queue-arn',
+      tier: ssm.ParameterTier.STANDARD,
+      stringValue: emailService.queue.queueArn
+    });
   }
 }

@@ -3,23 +3,23 @@ package notification
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	email "github.com/gofor-little/aws-email"
-	"github.com/gofor-little/xerror"
 
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/tmpl"
 )
 
 func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate EmailTemplate) (string, error) {
 	if err := checkPackage(); err != nil {
-		return "", xerror.Wrap("checkPackage failed", err)
+		return "", err
 	}
 
 	data, err := tmpl.NewTemplateFromFile(templates, "templates/"+emailTemplate.FileName, emailTemplate.Data)
 	if err != nil {
-		return "", xerror.Wrap("failed to create template from file", err)
+		return "", fmt.Errorf("failed to create template from file: %w", err)
 	}
 
 	body, err := json.Marshal(&email.Data{
@@ -30,7 +30,7 @@ func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate E
 		ContentType: emailTemplate.ContentType,
 	})
 	if err != nil {
-		return "", xerror.Wrap("failed to marshal email.Data", err)
+		return "", fmt.Errorf("failed to marshal email.Data: %w", err)
 	}
 
 	input := &sqs.SendMessageInput{
@@ -40,7 +40,7 @@ func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate E
 
 	output, err := SQSClient.SendMessage(ctx, input)
 	if err != nil {
-		return "", xerror.Wrap("failed to send message to SQS", err)
+		return "", fmt.Errorf("failed to send message to SQS: %w", err)
 	}
 
 	return *output.MessageId, nil

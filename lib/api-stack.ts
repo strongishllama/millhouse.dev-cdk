@@ -8,67 +8,44 @@ import * as route53 from '@aws-cdk/aws-route53';
 import * as targets from '@aws-cdk/aws-route53-targets';
 import * as ssm from '@aws-cdk/aws-ssm';
 import * as sqs from '@aws-cdk/aws-sqs';
-import { DynamoDB, SecretsManager, SQS } from '@strongishllama/iam-constants-cdk';
+import { DynamoDB, SecretsManager, SQS } from '@strongishllama/aws-iam-constants';
 import { bundling } from './lambda';
-import { Stage } from './stage';
 import { Method } from './method';
 
 export interface ApiStackProps extends cdk.StackProps {
-  namespace: string;
-  stage: Stage;
-  lambdasConfigArn: string;
-  adminTo: string;
-  adminFrom: string;
+  readonly accessControlAllowOrigin: string;
+  readonly recaptchaSecretArn: string;
+  readonly baseDomainName: string;
+  readonly fullDomainName: string;
 }
 
 export class ApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
-    // Fetch the table via the table ARN.
-    const table = dynamodb.Table.fromTableArn(
-      this,
-      `${props.namespace}-subscription-table${props.stage}`,
-      ssm.StringParameter.fromStringParameterName(this, `${props.namespace}-subscription-table-arn-${props.stage}`, `${props.namespace}-table-arn-${props.stage}`).stringValue
-    );
+    const table = dynamodb.Table.fromTableArn(this, 'subscription-table', ssm.StringParameter.fromStringParameterName(this, 'table-arn', 'table-arn').stringValue);
+    const emailQueue = sqs.Queue.fromQueueArn(this, 'email-queue', ssm.StringParameter.fromStringParameterName(this, 'email-queue-arn', 'email-queue-arn').stringValue);
 
-    // Fetch the email queue via the queue ARN.
-    const emailQueue = sqs.Queue.fromQueueArn(
-      this,
-      `${props.namespace}-email-queue-${props.stage}`,
-      ssm.StringParameter.fromStringParameterName(this, `${props.namespace}-email-queue-arn-${props.stage}`, `${props.namespace}-email-queue-${props.stage}`).stringValue
-    );
-
-    // Create a REST API for the website to interact with.
-    const api = new apigateway.RestApi(this, `${props.namespace}-rest-api-${props.stage}`, {
+    const api = new apigateway.RestApi(this, 'rest-api', {
       defaultCorsPreflightOptions: {
-        allowOrigins: props.stage === Stage.PROD ? ["https://millhouse.dev"] : apigateway.Cors.ALL_ORIGINS
-      },
-      deployOptions: {
-        stageName: props.stage
-      },
+        allowOrigins: [props.accessControlAllowOrigin]
+      }
     });
 
     // Add ping method - /
-    api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, `${props.namespace}-ping-function-${props.stage}`, {
+    api.root.addMethod(Method.GET, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, 'ping-function', {
       entry: 'lambdas/api/ping',
-      bundling: bundling,
-      environment: {
-        'STAGE': props.stage
-      }
+      bundling: bundling
     })));
 
     // Add subscribe method - /subscribe
-    api.root.addResource('subscribe').addMethod(Method.PUT, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, `${props.namespace}-subscribe-function-${props.stage}`, {
+    api.root.addResource('subscribe').addMethod(Method.PUT, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, 'subscribe-function', {
       entry: 'lambdas/api/subscribe',
       bundling: bundling,
       environment: {
-        'ACCESS_CONTROL_ALLOW_ORIGIN': props.stage === Stage.PROD ? 'https://millhouse.dev' : '*',
-        'ADMIN_TO': props.adminTo,
-        'ADMIN_FROM': props.adminFrom,
-        'CONFIG_SECRET_ARN': props.lambdasConfigArn,
+        'ACCESS_CONTROL_ALLOW_ORIGIN': props.accessControlAllowOrigin,
+        'RECAPTCHA_SECRET_ARN': props.recaptchaSecretArn,
         'EMAIL_QUEUE_URL': emailQueue.queueUrl,
-        'STAGE': props.stage,
         'TABLE_NAME': table.tableName
       },
       initialPolicy: [
@@ -77,7 +54,7 @@ export class ApiStack extends cdk.Stack {
             SecretsManager.GET_SECRET_VALUE
           ],
           resources: [
-            props.lambdasConfigArn
+            props.recaptchaSecretArn
           ]
         }),
         new iam.PolicyStatement({
@@ -102,11 +79,11 @@ export class ApiStack extends cdk.Stack {
     })));
 
     // Add unsubscribe method - /unsubscribe
-    api.root.addResource('unsubscribe').addMethod(Method.GET, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, `${props.namespace}-unsubscribe-function-${props.stage}`, {
+    api.root.addResource('unsubscribe').addMethod(Method.GET, new apigateway.LambdaIntegration(new go_lambda.GoFunction(this, 'unsubscribe-function', {
       entry: 'lambdas/api/unsubscribe',
       bundling: bundling,
       environment: {
-        'ACCESS_CONTROL_ALLOW_ORIGIN': props.stage === Stage.PROD ? 'https://millhouse.dev' : 'https://dev.millhouse.dev',
+        'ACCESS_CONTROL_ALLOW_ORIGIN': props.accessControlAllowOrigin,
         'TABLE_NAME': table.tableName
       },
       initialPolicy: [
@@ -121,33 +98,24 @@ export class ApiStack extends cdk.Stack {
       ]
     })));
 
-    // Fetch hosted zone via the domain name.
-    const hostedZone = route53.HostedZone.fromLookup(this, `${props.namespace}-hosted-zone-${props.stage}`, {
-      domainName: 'millhouse.dev'
+    const hostedZone = route53.HostedZone.fromLookup(this, 'hosted-zone', {
+      domainName: props.baseDomainName
     });
 
-    // Determine the full domain name based on the stage.
-    const fullDomainName = props.stage === Stage.PROD ? 'api.millhouse.dev' : `${props.stage}.api.millhouse.dev`;
-
-    // Create a DNS validated certificate for HTTPS
-    const certificate = new certificatemanager.DnsValidatedCertificate(this, `${props.namespace}-api-certificate-${props.stage}`, {
-      domainName: fullDomainName,
-      hostedZone: route53.HostedZone.fromLookup(this, `${props.namespace}-api-hosted-zone-${props.stage}`, {
-        domainName: 'millhouse.dev'
-      })
+    const certificate = new certificatemanager.DnsValidatedCertificate(this, 'api-certificate', {
+      domainName: props.fullDomainName,
+      hostedZone: hostedZone
     });
 
-    // Create a domain name for the API and map it.
-    const domain = new apigateway.DomainName(this, `${props.namespace}-api-domain-name-${props.stage}`, {
-      domainName: fullDomainName,
+    const domain = new apigateway.DomainName(this, 'api-domain-name', {
+      domainName: props.fullDomainName,
       certificate: certificate,
     });
     domain.addBasePathMapping(api);
 
-    // Create an A record pointing at the web distribution.
-    new route53.ARecord(this, `${props.namespace}-a-record-${props.stage}`, {
+    new route53.ARecord(this, 'a-record', {
       zone: hostedZone,
-      recordName: fullDomainName,
+      recordName: props.fullDomainName,
       ttl: cdk.Duration.seconds(60),
       target: route53.RecordTarget.fromAlias(new targets.ApiGatewayDomain(domain))
     });

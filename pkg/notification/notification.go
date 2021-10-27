@@ -3,12 +3,12 @@ package notification
 import (
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	"github.com/gofor-little/xerror"
 )
 
 var (
@@ -20,6 +20,11 @@ var (
 )
 
 func Initialize(ctx context.Context, profile string, region string, queueURL string) error {
+	if len(queueURL) == 0 {
+		return errors.New("queue url cannot be empty")
+	}
+	QueueURL = queueURL
+
 	var cfg aws.Config
 	var err error
 
@@ -33,18 +38,17 @@ func Initialize(ctx context.Context, profile string, region string, queueURL str
 	}
 
 	SQSClient = sqs.NewFromConfig(cfg)
-	QueueURL = queueURL
 
 	return nil
 }
 
 func checkPackage() error {
 	if SQSClient == nil {
-		return xerror.Newf("notification.SQSClient is nil, have you called notification.Initialize()?")
+		return errors.New("notification.SQSClient is nil, have you called notification.Initialize()?")
 	}
 
 	if QueueURL == "" {
-		return xerror.Newf("notification.QueueURL is empty, did you call notification.Initialize()?")
+		return errors.New("notification.QueueURL is empty, did you call notification.Initialize()?")
 	}
 
 	return nil

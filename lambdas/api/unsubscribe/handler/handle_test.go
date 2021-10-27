@@ -14,8 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
+	"github.com/gofor-little/xlambda"
 	"github.com/stretchr/testify/require"
-	"github.com/strongishllama/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
@@ -30,13 +30,13 @@ func TestHandle(t *testing.T) {
 	subscription := setup(t)
 	defer teardown(t)
 
-	request, err := xlambda.NewProxyRequest(http.MethodGet, map[string]string{
+	request, err := xlambda.ProxyRequest(http.MethodGet, map[string]string{
 		"id":           subscription.ID,
 		"emailAddress": subscription.EmailAddress,
 	}, nil)
 	require.NoError(t, err)
 
-	response, err := handler.Handle(context.Background(), request)
+	response, err := handler.Handler(context.Background(), request)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 }

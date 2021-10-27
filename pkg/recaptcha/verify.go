@@ -3,10 +3,9 @@ package recaptcha
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/gofor-little/xerror"
 
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/xhttp"
 )
@@ -18,7 +17,7 @@ var (
 func Verify(ctx context.Context, secret string, challengeResponseToken string) (float32, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://www.google.com/recaptcha/api/siteverify", nil)
 	if err != nil {
-		return 0, xerror.Wrap("failed to build HTTP request", err)
+		return 0, fmt.Errorf("failed to build HTTP request: %w", err)
 	}
 
 	query := request.URL.Query()
@@ -34,21 +33,21 @@ func Verify(ctx context.Context, secret string, challengeResponseToken string) (
 
 	response, err := HTTPClient.Do(request)
 	if err != nil {
-		return 0, xerror.Wrap("failed to send HTTP request", err)
+		return 0, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return 0, xerror.Newf("unexpected status code returned", response.StatusCode)
+		return 0, fmt.Errorf("unexpected status code returned: %d", response.StatusCode)
 	}
 
 	responseData := &ResponseData{}
 	if err := json.NewDecoder(response.Body).Decode(&responseData); err != nil {
-		return 0, xerror.Wrap("failed to decode response body", err)
+		return 0, fmt.Errorf("failed to decode response body: %w", err)
 	}
 
 	if !responseData.Success {
-		return 0, xerror.Newf("verify challenge failed", responseData.ErrorCodes)
+		return 0, fmt.Errorf("verify challenge failed: %v", responseData.ErrorCodes)
 	}
 
 	return responseData.Score, nil

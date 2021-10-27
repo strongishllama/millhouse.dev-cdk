@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
-	"github.com/gofor-little/xerror"
-	"github.com/strongishllama/xlambda"
+	"github.com/gofor-little/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
 	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
@@ -17,17 +17,15 @@ import (
 func main() {
 	log.Log = log.NewStandardLogger(os.Stdout, nil)
 
-	tableName, err := env.MustGet("TABLE_NAME")
-	if err != nil {
-		log.Error(log.Fields{"error": xerror.Wrap("failed to get environment variable", err)})
-		os.Exit(1)
-	}
-	if err := db.Initialize(context.Background(), "", "", tableName); err != nil {
-		log.Error(log.Fields{"error": xerror.Wrap("failed to initialize the db package", err)})
+	if err := db.Initialize(context.Background(), "", "", env.Get("TABLE_NAME", "")); err != nil {
+		log.Error(log.Fields{"error": fmt.Errorf("failed to initialize the db package: %w", err)})
 		os.Exit(1)
 	}
 
-	xlambda.AccessControlAllowOrigin = env.Get("ACCESS_CONTROL_ALLOW_ORIGIN", "*")
+	if err := xlambda.Initialize(env.Get("ACCESS_CONTROL_ALLOW_ORIGIN", "*")); err != nil {
+		log.Error(log.Fields{"error": fmt.Errorf("failed to initialize the xlambda package; %w", err)})
+		os.Exit(1)
+	}
 
-	lambda.Start(handler.Handle)
+	lambda.Start(handler.Handler)
 }

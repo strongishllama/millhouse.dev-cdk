@@ -3,9 +3,8 @@ package tmpl
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"html/template"
-
-	"github.com/gofor-little/xerror"
 )
 
 func NewTemplateFromFile(fileSystem embed.FS, path string, data interface{}) ([]byte, error) {
@@ -13,17 +12,17 @@ func NewTemplateFromFile(fileSystem embed.FS, path string, data interface{}) ([]
 
 	fileData, err := fileSystem.ReadFile(path)
 	if err != nil {
-		return nil, xerror.Wrap("failed to read file data", err)
+		return nil, fmt.Errorf("failed to read file data: %w", err)
 	}
 
 	tmpl, err = tmpl.Parse(string(fileData))
 	if err != nil {
-		return nil, xerror.Wrap("failed to parse template", err)
+		return nil, fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	buffer := &bytes.Buffer{}
 	if err := tmpl.Execute(buffer, data); err != nil {
-		return nil, xerror.Wrap("failed to execute template", err)
+		return nil, fmt.Errorf("failed to execute template: %w", err)
 	}
 
 	return buffer.Bytes(), nil

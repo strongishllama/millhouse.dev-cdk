@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	lambda.Start(handler.Handle)
+	lambda.Start(handler.Handler)
 }

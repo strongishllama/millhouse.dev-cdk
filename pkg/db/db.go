@@ -2,12 +2,12 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gofor-little/xerror"
 )
 
 var (
@@ -16,6 +16,11 @@ var (
 )
 
 func Initialize(ctx context.Context, profile string, region string, tableName string) error {
+	if len(tableName) == 0 {
+		return errors.New("table name cannot be empty")
+	}
+	TableName = tableName
+
 	var cfg aws.Config
 	var err error
 
@@ -29,18 +34,17 @@ func Initialize(ctx context.Context, profile string, region string, tableName st
 	}
 
 	DynamoDBClient = dynamodb.NewFromConfig(cfg)
-	TableName = tableName
 
 	return nil
 }
 
 func checkPackage() error {
 	if DynamoDBClient == nil {
-		return xerror.New("db.DynamoDBClient is nil, have you called db.Initialize()?")
+		return errors.New("db.DynamoDBClient is nil, have you called db.Initialize()?")
 	}
 
 	if TableName == "" {
-		return xerror.New("db.TableName is empty, did you call db.Initialize()?")
+		return errors.New("db.TableName is empty, did you call db.Initialize()?")
 	}
 
 	return nil

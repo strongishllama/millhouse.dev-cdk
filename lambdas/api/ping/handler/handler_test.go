@@ -10,8 +10,8 @@ import (
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/ping/handler"
 )
 
-func TestHandle(t *testing.T) {
-	response, err := handler.Handle(context.Background(), nil)
+func TestHandler(t *testing.T) {
+	response, err := handler.Handler(context.Background(), nil)
 
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, response.StatusCode)

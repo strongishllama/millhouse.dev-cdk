@@ -2,24 +2,25 @@ package db
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/gofor-little/xerror"
 	"github.com/gofor-little/xrand"
 )
 
 func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription, error) {
 	if err := checkPackage(); err != nil {
-		return nil, xerror.Wrap("checkPackage failed", err)
+		return nil, err
 	}
 
 	id, err := xrand.UUIDV4()
 	if err != nil {
-		return nil, xerror.Wrap("failed to generate UUID", err)
+		return nil, fmt.Errorf("failed to generate UUID: %w", err)
 	}
 	subscription := &Subscription{
 		ID:           id,
@@ -29,12 +30,12 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 	}
 
 	if err := subscription.Validate(); err != nil {
-		return nil, xerror.Wrap("failed to validate subscription", err)
+		return nil, fmt.Errorf("failed to validate subscription: %w", err)
 	}
 
 	attributeValues, err := attributevalue.MarshalMap(subscription)
 	if err != nil {
-		return nil, xerror.Wrap("failed to marshal subscription into attribute values", err)
+		return nil, fmt.Errorf("failed to marshal subscription into attribute values: %w", err)
 	}
 	attributeValues["pk"] = &types.AttributeValueMemberS{
 		Value: "SUBSCRIPTION#" + subscription.EmailAddress,
@@ -49,7 +50,7 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 	}
 
 	if _, err := DynamoDBClient.PutItem(ctx, input); err != nil {
-		return nil, xerror.Wrap("failed to put item", err)
+		return nil, err
 	}
 
 	return subscription, nil
@@ -57,7 +58,7 @@ func CreateSubscription(ctx context.Context, emailAddress string) (*Subscription
 
 func DeleteSubscription(ctx context.Context, id string, emailAddress string) error {
 	if err := checkPackage(); err != nil {
-		return xerror.Wrap("checkPackage failed", err)
+		return err
 	}
 
 	input := &dynamodb.DeleteItemInput{
@@ -73,7 +74,7 @@ func DeleteSubscription(ctx context.Context, id string, emailAddress string) err
 	}
 
 	if _, err := DynamoDBClient.DeleteItem(ctx, input); err != nil {
-		return xerror.Wrap("failed to delete subscription", err)
+		return err
 	}
 
 	return nil
@@ -81,11 +82,11 @@ func DeleteSubscription(ctx context.Context, id string, emailAddress string) err
 
 func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, error) {
 	if err := checkPackage(); err != nil {
-		return nil, xerror.Wrap("checkPackage failed", err)
+		return nil, err
 	}
 
 	if emailAddress == "" {
-		return nil, xerror.New("emailAddress cannot be empty")
+		return nil, errors.New("emailAddress cannot be empty")
 	}
 
 	input := &dynamodb.QueryInput{
@@ -105,7 +106,7 @@ func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, e
 
 	output, err := DynamoDBClient.Query(ctx, input)
 	if err != nil {
-		return nil, xerror.Wrap("failed to query subscription", err)
+		return nil, err
 	}
 
 	if len(output.Items) == 0 {
@@ -114,7 +115,7 @@ func GetSubscription(ctx context.Context, emailAddress string) (*Subscription, e
 
 	var subscription *Subscription
 	if err := attributevalue.UnmarshalMap(output.Items[0], &subscription); err != nil {
-		return nil, xerror.Wrap("failed to unmarshal attribute values into Subscription", err)
+		return nil, fmt.Errorf("failed to unmarshal attribute values into Subscription: %w", err)
 	}
 
 	return subscription, nil
@@ -128,16 +129,16 @@ type Subscription struct {
 }
 
 func (s *Subscription) Validate() error {
-	if s.EmailAddress == "" {
-		return xerror.New("EmailAddress cannot be empty")
+	if len(s.EmailAddress) == 0 {
+		return errors.New("email address cannot be empty")
 	}
 
 	if s.CreatedAt == (time.Time{}) {
-		return xerror.New("CreatedAt cannot be empty")
+		return errors.New("created at cannot be empty")
 	}
 
 	if s.UpdatedAt == (time.Time{}) {
-		return xerror.New("UpdatedAt cannot be empty")
+		return errors.New("updated at cannot be empty")
 	}
 
 	return nil
