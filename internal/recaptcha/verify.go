@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/xhttp"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/xhttp"
 )
 
 var (

@@ -11,9 +11,9 @@ import (
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xlambda"
 
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/notification"
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/subscribe/handler"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/notification"
 )
 
 func main() {

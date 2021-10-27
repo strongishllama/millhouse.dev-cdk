@@ -15,10 +15,11 @@ import (
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xlambda"
+	"github.com/gofor-little/xrand"
 	"github.com/stretchr/testify/require"
 
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
 )
 
 var (
@@ -105,8 +106,15 @@ func teardown(t *testing.T) {
 }
 
 func createSubscription(t *testing.T) *db.Subscription {
-	subscription, err := db.CreateSubscription(context.Background(), "test@example.com")
-	if err != nil && setupSleep <= 30 {
+	id, err := xrand.UUIDV4()
+	require.NoError(t, err)
+	subscription := &db.Subscription{
+		ID:           id,
+		EmailAddress: "test@example.com",
+		IsConfirmed:  false,
+	}
+
+	if err := subscription.Create(context.Background()); err != nil && setupSleep <= 30 {
 		aerr := &types.ResourceNotFoundException{}
 		if !errors.As(err, &aerr) {
 			require.NoError(t, err)

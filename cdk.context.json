@@ -6,5 +6,9 @@
   "hosted-zone:account=250096756762:domainName=dev.millhouse.dev:region=ap-southeast-2": {
     "Id": "/hostedzone/Z04772451I71K0O6KW3Q1",
     "Name": "dev.millhouse.dev."
+  },
+  "hosted-zone:account=535766190525:domainName=millhouse.dev:region=ap-southeast-2": {
+    "Id": "/hostedzone/Z04788122U5CD2G8I3OAD",
+    "Name": "millhouse.dev."
   }
 }

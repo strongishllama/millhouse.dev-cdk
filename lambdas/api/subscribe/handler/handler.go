@@ -9,9 +9,10 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/gofor-little/xlambda"
+	"github.com/gofor-little/xrand"
 
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/recaptcha"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/recaptcha"
 )
 
 var (
@@ -40,7 +41,16 @@ func Handler(ctx context.Context, request *events.APIGatewayProxyRequest) (*even
 		return xlambda.ProxyResponseJSON(http.StatusOK, nil, nil)
 	}
 
-	if _, err = db.CreateSubscription(ctx, data.EmailAddress); err != nil {
+	id, err := xrand.UUIDV4()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate UUID: %w", err)
+	}
+	subscription = &db.Subscription{
+		ID:           id,
+		EmailAddress: data.EmailAddress,
+		IsConfirmed:  false,
+	}
+	if err := subscription.Create(ctx); err != nil {
 		return xlambda.ProxyResponseJSON(http.StatusInternalServerError, fmt.Errorf("failed to create subscription: %w", err), nil)
 	}
 

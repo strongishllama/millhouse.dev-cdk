@@ -9,8 +9,8 @@ import (
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
 
+	"github.com/strongishllama/millhouse.dev-cdk/internal/notification"
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/stream/handler"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/notification"
 )
 
 func main() {

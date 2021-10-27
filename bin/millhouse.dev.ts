@@ -5,7 +5,6 @@ import { WebsiteStack } from '../lib/website-stack';
 
 const app = new cdk.App();
 
-
 // Development stacks.
 {
   const env: cdk.Environment = {
@@ -13,52 +12,65 @@ const app = new cdk.App();
     region: 'ap-southeast-2'
   };
   const namespace = 'dev';
+  const baseDomainName =  'dev.millhouse.dev';
+  const apiDomainName = `api.${baseDomainName}`;
+
   new BootstrapStack(app, `${namespace}-bootstrap-stack`, {
     env: env,
     tableRemovalPolicy: cdk.RemovalPolicy.DESTROY,
     enableBackups: false,
-    fromAddress: 'no-reply@dev.millhouse.dev',
-    apiDomainName: 'api.dev.millhouse.dev',
-    websiteDomainName: 'dev.millhouse.dev'
+    fromAddress: `no-reply@${baseDomainName}`,
+    apiDomainName: apiDomainName,
+    websiteDomainName: baseDomainName
   });
   new ApiStack(app, `${namespace}-api-stack`, {
     env: env,
-    accessControlAllowOrigin: 'https://dev.millhouse.dev',
+    accessControlAllowOrigin: `https://${baseDomainName}`,
     recaptchaSecretArn: 'arn:aws:secretsmanager:ap-southeast-2:250096756762:secret:recaptcha-secret-arn-LQz25E',
-    baseDomainName: 'dev.millhouse.dev',
-    fullDomainName: 'api.dev.millhouse.dev'
+    baseDomainName: baseDomainName,
+    fullDomainName: apiDomainName
   });
   new WebsiteStack(app, `${namespace}-website-stack`, {
     env: env,
-    baseDomainName: 'dev.millhouse.dev',
-    fullDomainName: 'dev.millhouse.dev',
+    baseDomainName: baseDomainName,
+    fullDomainName: baseDomainName,
     githubOAuthTokenArn: 'arn:aws:secretsmanager:ap-southeast-2:250096756762:secret:github-personal-access-token-6eAvoW',
-    apiBaseUrl: 'https://api.dev.millhouse.dev',
+    apiBaseUrl: `https://${apiDomainName}`,
     approvalNotifyEmails: []
   });
 }
 
 // Production stacks.
-// new BootstrapStack(app, `${namespace}-bootstrap-stack-${Stage.PROD}`, {
-//   env: env,
-//   namespace: namespace,
-//   stage: Stage.PROD,
-//   adminTo: checkEnv('ADMIN_TO'),
-//   adminFrom: checkEnv('ADMIN_FROM')
-// });
-// new ApiStack(app, `${namespace}-api-stack-${Stage.PROD}`, {
-//   env: env,
-//   namespace: namespace,
-//   stage: Stage.PROD,
-//   lambdasConfigArn: 'arn:aws:secretsmanager:ap-southeast-2:320045747480:secret:millhouse-dev-lambda-config-8VhyY9',
-//   adminTo: checkEnv('ADMIN_TO'),
-//   adminFrom: checkEnv('ADMIN_FROM')
-// });
-// new WebsiteStack(app, `${namespace}-website-stack-${Stage.PROD}`, {
-//   env: env,
-//   namespace: namespace,
-//   stage: Stage.PROD,
-//   approvalNotifyEmails: checkEnv('APPROVAL_NOTIFY_EMAILS').split(',')
-// });
+{
+  const env: cdk.Environment = {
+    account: '535766190525',
+    region: 'ap-southeast-2'
+  };
+  const namespace = 'prod';
+  const baseDomainName = 'millhouse.dev';
+  const apiDomainName = 'api.millhouse.dev';
 
-// cdk.Tags.of(app).add('project', 'millhouse.dev');
+  new BootstrapStack(app, `${namespace}-bootstrap-stack`, {
+    env: env,
+    tableRemovalPolicy: cdk.RemovalPolicy.DESTROY,
+    enableBackups: false,
+    fromAddress: 'no-reply@millhouse.dev',
+    apiDomainName: apiDomainName,
+    websiteDomainName: baseDomainName
+  });
+  new ApiStack(app, `${namespace}-api-stack`, {
+    env: env,
+    accessControlAllowOrigin: 'https://millhouse.dev',
+    recaptchaSecretArn: 'arn:aws:secretsmanager:ap-southeast-2:535766190525:secret:recaptcha-secret-arn-ZO4Wfp',
+    baseDomainName: baseDomainName,
+    fullDomainName: apiDomainName
+  });
+  new WebsiteStack(app, `${namespace}-website-stack`, {
+    env: env,
+    baseDomainName: baseDomainName,
+    fullDomainName: baseDomainName,
+    githubOAuthTokenArn: 'arn:aws:secretsmanager:ap-southeast-2:535766190525:secret:github-personal-access-token-aDuSLr',
+    apiBaseUrl: `https://${apiDomainName}`,
+    approvalNotifyEmails: []
+  });
+}

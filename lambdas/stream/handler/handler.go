@@ -7,11 +7,10 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	email "github.com/gofor-little/aws-email"
-	"github.com/gofor-little/log"
 	"github.com/gofor-little/xlambda"
 
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/notification"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/notification"
 )
 
 const (
@@ -28,7 +27,6 @@ var (
 
 func Handler(ctx context.Context, event *events.DynamoDBEvent) error {
 	for _, r := range event.Records {
-		// Only handle items that are subscriptions from INSERT.
 		if !strings.HasPrefix(r.Change.Keys["pk"].String(), "SUBSCRIPTION#") || r.EventName != EventInsert {
 			continue
 		}
@@ -38,7 +36,11 @@ func Handler(ctx context.Context, event *events.DynamoDBEvent) error {
 			return fmt.Errorf("failed to unmarshal DynamoDB record into db.Subscription: %w", err)
 		}
 
-		messageID, err := notification.EnqueueEmail(ctx, []string{subscription.EmailAddress}, FromAddress, notification.EmailTemplate{
+		if subscription.IsConfirmed {
+			continue
+		}
+
+		_, err := notification.EnqueueEmail(ctx, []string{subscription.EmailAddress}, FromAddress, notification.EmailTemplate{
 			FileName:    "email/subscription-confirmation.tmpl.html",
 			Subject:     "Subscription Confirmation",
 			ContentType: email.ContentTypeTextHTML,
@@ -52,11 +54,11 @@ func Handler(ctx context.Context, event *events.DynamoDBEvent) error {
 		if err != nil {
 			return fmt.Errorf("failed to enqueue subscription confirmation email: %w", err)
 		}
-		log.Info(log.Fields{
-			"message":      "successfully enqueued subscription confirmation email",
-			"messageID":    messageID,
-			"emailAddress": subscription,
-		})
+
+		subscription.IsConfirmed = true
+		if err := subscription.Update(ctx); err != nil {
+			return err
+		}
 	}
 
 	return nil

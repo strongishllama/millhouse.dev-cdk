@@ -10,8 +10,8 @@ import (
 	"github.com/gofor-little/log"
 	"github.com/gofor-little/xlambda"
 
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/api/unsubscribe/handler"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
 )
 
 func main() {

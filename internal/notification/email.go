@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	email "github.com/gofor-little/aws-email"
 
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/tmpl"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/tmpl"
 )
 
 func EnqueueEmail(ctx context.Context, to []string, from string, emailTemplate EmailTemplate) (string, error) {

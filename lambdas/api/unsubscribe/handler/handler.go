@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/gofor-little/xlambda"
 
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/db"
-	"github.com/strongishllama/millhouse.dev-cdk/pkg/tmpl"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
+	"github.com/strongishllama/millhouse.dev-cdk/internal/tmpl"
 )
 
 var (
