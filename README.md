@@ -12,3 +12,6 @@ Some of the features include:
 
 ## Diagram
 ![](docs/assets/diagram.png)
+
+## Roadmap
+A GitHub [project](https://github.com/users/strongishllama/projects/2) is tracking the changes I'd like to implement at some point.
