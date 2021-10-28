@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	email "github.com/gofor-little/aws-email"
+	"github.com/gofor-little/log"
 	"github.com/gofor-little/xlambda"
 
 	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
@@ -52,11 +53,13 @@ func Handler(ctx context.Context, event *events.DynamoDBEvent) error {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("failed to enqueue subscription confirmation email: %w", err)
+			log.Error(log.Fields{"error": err})
+			return err
 		}
 
 		subscription.IsConfirmed = true
 		if err := subscription.Update(ctx); err != nil {
+			log.Error(log.Fields{"error": err})
 			return err
 		}
 	}

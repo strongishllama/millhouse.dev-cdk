@@ -4,24 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 )
 
 type Subscription struct {
-	EmailAddress string    `json:"emailAddress"`
-	ID           string    `json:"id"`
-	IsConfirmed  bool      `json:"isConfirmed"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	EmailAddress string `json:"emailAddress" dynamodbav:"emailAddress"`
+	ID           string `json:"id" dynamodbav:"id"`
+	IsConfirmed  bool   `json:"isConfirmed" dynamodbav:"isConfirmed"`
 }
 
 // Create creates a new subscription.
 func (s *Subscription) Create(ctx context.Context) error {
-	s.CreatedAt = time.Now()
-	s.UpdatedAt = time.Now()
-
 	if err := putItem(ctx, s); err != nil {
 		return fmt.Errorf("failed to create subscription: %w", err)
 	}
@@ -100,12 +94,5 @@ func (s *Subscription) validate() error {
 	if len(s.EmailAddress) == 0 {
 		return errors.New("email address cannot be empty")
 	}
-	if s.CreatedAt == (time.Time{}) {
-		return errors.New("created at cannot be empty")
-	}
-	if s.UpdatedAt == (time.Time{}) {
-		return errors.New("updated at cannot be empty")
-	}
-
 	return nil
 }

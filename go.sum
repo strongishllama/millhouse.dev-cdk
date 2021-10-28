@@ -33,8 +33,9 @@ github.com/aws/aws-sdk-go-v2/internal/ini v1.2.1/go.mod h1:Pv3WenDjI0v2Jl7UaMFII
 github.com/aws/aws-sdk-go-v2/internal/ini v1.2.2/go.mod h1:BQV0agm+JEhqR+2RT5e1XTFIDcAAV0eW6z2trp+iduw=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.2.5 h1:zPxLGWALExNepElO0gYgoqsbqTlt4ZCrhZ7XlfJ+Qlw=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.2.5/go.mod h1:6ZBTuDmvpCOD4Sf1i2/I3PgftlEcDGgvi8ocq64oQEg=
-github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.7.0 h1:WawsbN8zghKfuEZrhoZ9IHFdqTzf6zmqniRaOsbljkM=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.7.0/go.mod h1:jzXhaT4UBE8ifFRfV2A1Eci0+VoIgKedzCzv8Tv7rMc=
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.8.0 h1:WQY4Qit9/XiIAH4mhbT8qaMFIWl2OExcXrFecz2eGXQ=
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.8.0/go.mod h1:clJaIaj1E6A3vSq1Qd++dfcG3dbF8gUfTEUiaTZxpVY=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.6.0 h1:HDp8hUQlGU5fgNoNDp0BOthk57AuTXMTaAK1mb9c27I=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.6.0/go.mod h1:t8pYXJHxfOe/088CcNeuqQbucpq9SwO1yjheCieDDnI=
 github.com/aws/aws-sdk-go-v2/service/dynamodbstreams v1.5.0 h1:At4HitvrEFdSA5rNS1KHA65BYizq2p+gLtASYtoAH2A=
@@ -92,8 +93,9 @@ github.com/gofor-little/env v0.4.4/go.mod h1:Jefo+ty+Xy9xSIlClJ73QJR1eCV0fCEU4de
 github.com/gofor-little/env v1.0.0/go.mod h1:8OLro9C21TW5/k/mKEWSCxLE0G1awgoLGrUtLNeFZCU=
 github.com/gofor-little/env v1.0.2 h1:N3GtFpkLn64muKUY+63LpOv+lBt4K1hwlK2+Tx2mw8U=
 github.com/gofor-little/env v1.0.2/go.mod h1:O9VC/sxOcJfu6DPWz6EUVULGJ6ufdy8QkfUZC7OVKQc=
-github.com/gofor-little/log v1.0.3 h1:G1s3r+ECYnjRMTHNC/JKHR4nwPLyCo2cXWZdwZDsONE=
 github.com/gofor-little/log v1.0.3/go.mod h1:iKuLiHde6jRfS+VMhODCnUCechRarfFh8cs3pcxy93I=
+github.com/gofor-little/log v1.0.4 h1:6Kz/jGPfRIYgbHLXlesr3GX1KWgwilSId+eo5HtkQBA=
+github.com/gofor-little/log v1.0.4/go.mod h1:gdeK6sOp88lVaKZ81rh7PrCr9YIHJK2W1m0+8o2p8wA=
 github.com/gofor-little/ts v0.2.7 h1:n01haegMVhnxvPL/yGZ+qx6LGUmzi1LqwlnvPAxyTKQ=
 github.com/gofor-little/ts v0.2.7/go.mod h1:Wyhr4tcC1dySONAKE3xvtwPma2R7DGhC67rLe0VG8B8=
 github.com/gofor-little/xerror v0.4.1/go.mod h1:wjsFMng4jjalKHCSIocghCPYXEHqdpkb37EHTwrlj2I=

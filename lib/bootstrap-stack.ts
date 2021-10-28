@@ -8,7 +8,7 @@ import * as lambda_events from '@aws-cdk/aws-lambda-event-sources';
 import * as ssm from '@aws-cdk/aws-ssm';
 import * as sqs from '@aws-cdk/aws-sqs';
 import { EmailService } from '@strongishllama/email-service-cdk';
-import { SQS } from '@strongishllama/aws-iam-constants';
+import { DynamoDB, SQS } from '@strongishllama/aws-iam-constants';
 import { bundling } from './lambda';
 
 export interface BootstrapStackProps extends cdk.StackProps {
@@ -51,16 +51,27 @@ export class BootstrapStack extends cdk.Stack {
       environment: {
         'FROM_ADDRESS': props.fromAddress,
         'EMAIL_QUEUE_URL': emailService.queue.queueUrl,
+        'TABLE_NAME': table.tableName,
         'API_DOMAIN': props.apiDomainName,
         'WEBSITE_DOMAIN': props.websiteDomainName
       },
       initialPolicy: [
         new iam.PolicyStatement({
           actions: [
+            DynamoDB.UPDATE_ITEM,
             SQS.SEND_MESSAGE
           ],
           resources: [
             emailService.queue.queueArn
+          ]
+        }),
+        new iam.PolicyStatement({
+          actions: [
+            DynamoDB.UPDATE_ITEM
+          ],
+          resources: [
+            table.tableArn,
+            `${table.tableArn}/index/*`
           ]
         }),
       ]
@@ -70,7 +81,7 @@ export class BootstrapStack extends cdk.Stack {
       onFailure: new lambda_events.SqsDlq(new sqs.Queue(this, 'stream-dead-letter-queue', {
         receiveMessageWaitTime: cdk.Duration.seconds(20)
       })),
-      retryAttempts: 3,
+      retryAttempts: 0,
       startingPosition: lambda.StartingPosition.TRIM_HORIZON
     }));
 

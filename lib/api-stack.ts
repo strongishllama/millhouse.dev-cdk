@@ -59,8 +59,10 @@ export class ApiStack extends cdk.Stack {
         }),
         new iam.PolicyStatement({
           actions: [
+            DynamoDB.GET_ITEM,
             DynamoDB.PUT_ITEM,
             DynamoDB.QUERY,
+            DynamoDB.UPDATE_ITEM
           ],
           resources: [
             table.tableArn,
@@ -89,7 +91,8 @@ export class ApiStack extends cdk.Stack {
       initialPolicy: [
         new iam.PolicyStatement({
           actions: [
-            DynamoDB.DELETE_ITEM
+            DynamoDB.DELETE_ITEM,
+            DynamoDB.UPDATE_ITEM
           ],
           resources: [
             table.tableArn

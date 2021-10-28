@@ -83,34 +83,61 @@ func deleteItem(ctx context.Context, it itemType, pk string, sk string) error {
 	return nil
 }
 
-// getItem fetches a single item based on its primary key and sort key from the
-// DynamoDB table. The 'item' parameter must be a non-nil pointer to a slice of
-// elements that implement the item interface.
+// getItem fetches a single item based on its primary key and optionall sort key from
+// the DynamoDB table. If the sort key is present a get item call will be made to the
+// table, otherwise a query call will be used. The item parameter must be a non-nil
+// pointer to an object.
 func getItem(ctx context.Context, pk string, sk string, item interface{}) error {
 	if err := checkPackage(); err != nil {
 		return err
 	}
 
-	key := map[string]types.AttributeValue{
-		"pk": &types.AttributeValueMemberS{Value: pk},
-	}
-	if len(sk) != 0 {
-		key["sk"] = &types.AttributeValueMemberS{Value: sk}
+	var dbItem map[string]types.AttributeValue
+
+	if len(sk) == 0 {
+		expr, err := expression.NewBuilder().WithKeyCondition(
+			expression.KeyConditionBuilder(
+				expression.Key("pk").Equal(expression.Value(pk)),
+			),
+		).Build()
+		if err != nil {
+			return fmt.Errorf("failed to build query expression: %w", err)
+		}
+
+		output, err := DynamoDBClient.Query(ctx, &dynamodb.QueryInput{
+			TableName:                 aws.String(TableName),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+			KeyConditionExpression:    expr.KeyCondition(),
+		})
+		if err != nil {
+			return err
+		}
+
+		if len(output.Items) == 0 {
+			return nil
+		}
+		dbItem = output.Items[0]
+	} else {
+		output, err := DynamoDBClient.GetItem(ctx, &dynamodb.GetItemInput{
+			TableName: aws.String(TableName),
+			Key: map[string]types.AttributeValue{
+				"pk": &types.AttributeValueMemberS{Value: pk},
+				"sk": &types.AttributeValueMemberS{Value: sk},
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		dbItem = output.Item
 	}
 
-	output, err := DynamoDBClient.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: aws.String(TableName),
-		Key:       key,
-	})
-	if err != nil {
-		return err
-	}
-
-	if output.Item == nil {
+	if dbItem == nil {
 		return nil
 	}
 
-	if err := attributevalue.UnmarshalMap(output.Item, &item); err != nil {
+	if err := attributevalue.UnmarshalMap(dbItem, &item); err != nil {
 		return fmt.Errorf("failed to unmarshal item into interface: %w", err)
 	}
 

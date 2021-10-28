@@ -52,8 +52,8 @@ const app = new cdk.App();
 
   new BootstrapStack(app, `${namespace}-bootstrap-stack`, {
     env: env,
-    tableRemovalPolicy: cdk.RemovalPolicy.DESTROY,
-    enableBackups: false,
+    tableRemovalPolicy: cdk.RemovalPolicy.RETAIN,
+    enableBackups: true,
     fromAddress: 'no-reply@millhouse.dev',
     apiDomainName: apiDomainName,
     websiteDomainName: baseDomainName

@@ -9,6 +9,7 @@ import (
 	"github.com/gofor-little/env"
 	"github.com/gofor-little/log"
 
+	"github.com/strongishllama/millhouse.dev-cdk/internal/db"
 	"github.com/strongishllama/millhouse.dev-cdk/internal/notification"
 	"github.com/strongishllama/millhouse.dev-cdk/lambdas/stream/handler"
 )
@@ -18,6 +19,11 @@ func main() {
 
 	if err := notification.Initialize(context.Background(), "", "", env.Get("EMAIL_QUEUE_URL", "")); err != nil {
 		log.Error(log.Fields{"error": fmt.Errorf("failed to initialize the notification package: %w", err)})
+		os.Exit(1)
+	}
+
+	if err := db.Initialize(context.Background(), "", "", env.Get("TABLE_NAME", "")); err != nil {
+		log.Error(log.Fields{"error": fmt.Errorf("failed to initialize the db package: %w", err)})
 		os.Exit(1)
 	}
 
