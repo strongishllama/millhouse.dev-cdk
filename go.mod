@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.4.4
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.3.4
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.10.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.12.1
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.13.1
 	github.com/gofor-little/aws-email v0.2.1
 	github.com/gofor-little/cfg v0.3.1
 	github.com/gofor-little/env v1.0.2
