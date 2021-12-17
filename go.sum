@@ -96,8 +96,9 @@ github.com/gofor-little/cfg v0.3.1 h1:qiJ/lmgbqXZ+lI4zg6j9Atvtxsl0Ix2FyScjjupySM
 github.com/gofor-little/cfg v0.3.1/go.mod h1:9Oih8XGmul1r4woOClnB5PZ753VdAfyto6DxoQffI34=
 github.com/gofor-little/env v0.4.4/go.mod h1:Jefo+ty+Xy9xSIlClJ73QJR1eCV0fCEU4denlQnc3z4=
 github.com/gofor-little/env v1.0.0/go.mod h1:8OLro9C21TW5/k/mKEWSCxLE0G1awgoLGrUtLNeFZCU=
-github.com/gofor-little/env v1.0.2 h1:N3GtFpkLn64muKUY+63LpOv+lBt4K1hwlK2+Tx2mw8U=
 github.com/gofor-little/env v1.0.2/go.mod h1:O9VC/sxOcJfu6DPWz6EUVULGJ6ufdy8QkfUZC7OVKQc=
+github.com/gofor-little/env v1.0.3 h1:mvBCdRwJwV+NZQb4TAck5czLvHeQPRTqo4q/7/X26mw=
+github.com/gofor-little/env v1.0.3/go.mod h1:O9VC/sxOcJfu6DPWz6EUVULGJ6ufdy8QkfUZC7OVKQc=
 github.com/gofor-little/log v1.0.3/go.mod h1:iKuLiHde6jRfS+VMhODCnUCechRarfFh8cs3pcxy93I=
 github.com/gofor-little/log v1.0.4 h1:6Kz/jGPfRIYgbHLXlesr3GX1KWgwilSId+eo5HtkQBA=
 github.com/gofor-little/log v1.0.4/go.mod h1:gdeK6sOp88lVaKZ81rh7PrCr9YIHJK2W1m0+8o2p8wA=
