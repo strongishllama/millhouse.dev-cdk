@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-lambda-go v1.28.0
 	github.com/aws/aws-sdk-go-v2 v1.16.1
 	github.com/aws/aws-sdk-go-v2/config v1.15.0
-	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.8.0
+	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.8.2
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.4.1
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.15.2
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.18.0
