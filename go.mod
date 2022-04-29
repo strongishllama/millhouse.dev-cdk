@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.16.3
 	github.com/aws/aws-sdk-go-v2/config v1.15.4
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.9.1
-	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.4.6
+	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.4.7
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.15.4
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.18.4
 	github.com/gofor-little/aws-email v0.2.1
