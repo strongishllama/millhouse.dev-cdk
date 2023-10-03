@@ -1,5 +1,7 @@
 # millhouse.dev CDK
 
+**This is an old version of my personal website and is no longer maintained. You can find the new version over [here](https://gitlab.com/strongishllama/millhouse.dev)** 😁
+
 ## Introduction
 This repository contains the AWS CDK stacks to deploy my personal website. I use this website to write blog posts about topics that interest me and experiment with different web technologies. You can visit the website [here](https://millhouse.dev).
 
